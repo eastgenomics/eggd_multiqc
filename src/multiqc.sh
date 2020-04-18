@@ -12,33 +12,47 @@
 # Any code outside of main() (or any entry point you may add) is
 # ALWAYS executed, followed by running the entry point itself.
 #
-# See https://documentation.dnanexus.com/developer for tutorials on how
-# to modify this file.
+
+# Exit at any point if there is any error and output each line as it is executed (for debugging)
+set -e -x -o pipefail
 
 main() {
 
     echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
+    # SET VARIABLES
+    # Store the API key. Grants the script access to DNAnexus resources
+    # this line definitely NEEDS TO BE UPDATED!!!    
+    API_KEY=$(dx cat project-FQqXfYQ0Z0gqx7XG9Z2b4K43:mokaguys_nexus_auth_key)
+    # Capture the project runfolder name. Names the multiqc HTML input and builds the output file path
+    # it's 003 in testing, but has to be changed to 002 for production!
+    project=$(echo $project_for_multiqc | sed 's/003_//')
+    # Assign multiqc output directory name to variable and create
+    outdir=out/multiqc/QC/multiqc && mkdir -p ${outdir}
+    # Assing multiqc report output directory name to variable and create
+    report_outdir=out/multiqc_report/QC/multiqc && mkdir -p ${report_outdir}
 
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
+    # This line is very likely completely wrong, probably use the next from moka-guys??
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    # Files for multiqc are stored at 'project_for_multiqc:/QC/''. Download the contents of this folder.
+    dx download ${project_for_multiqc}:QC/* --auth ${API_KEY}
 
-    # Fill in your application code here.
-    #
-    # To report any recognized errors in the correct format in
-    # $HOME/job_error.json and exit this script, you can use the
-    # dx-jobutil-report-error utility as follows:
-    #
-    #   dx-jobutil-report-error "My error message"
-    #
-    # Note however that this entire bash script is executed with -e
-    # when running in the cloud, so any line which returns a nonzero
-    # exit code will prematurely exit the script; if no error was
-    # reported in the job_error.json file, then the failure reason
-    # will be AppInternalError with a generic error message.
+    # Fill in your application code here. below modified from moka-guys:
+    # Call multiqc v1.8 from docker image (ewels_multiqc_v1.8).
+    # This image is an asset on DNAnexus, bundled with the app??? - Sophie
+    # MultiQC is run with the following parameters :
+    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    # The docker -v flag mounts a local directory to the docker environment in the format:
+    #    -v local_dir:docker_dir
+    # Here, the directory 'sandbox' is mapped to the /home/dnanexus directory, and passed to
+    # multiqc to search for QC files. Docker passes any new files back to this mapped location on the DNAnexus worker.
+    docker run ewels/multiqc:1.8 multiqc sandbox/ \
+        -n sandbox/${outdir}/${project}-multiqc.html -c sandbox/multiqc_config.yaml
+
 
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
@@ -48,13 +62,21 @@ main() {
 
     html_report=$(dx upload html_report --brief)
 
+    # Taken from moka-guys
+    # Move the config file to the multiqc data output folder. This was created by running multiqc
+    mv multiqc_config.yaml ${outdir}/${project}-multiqc_data/
+    # Move the multiqc report HTML to the output directory for uploading to the Viapath server
+    mv ${outdir}/${project}-multiqc.html ${report_outdir}
+
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
+    # class.  Run "dx-jobutil-add-output -h" for more information on what it does.
 
     dx-jobutil-add-output html_report "$html_report" --class=file
     for i in "${!multiqc_data_files[@]}"; do
         dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
     done
+
+    # Upload results
+    dx-upload-all-outputs
 }
