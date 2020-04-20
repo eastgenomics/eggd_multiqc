@@ -39,6 +39,12 @@
         "hours": 24
       }
     },
+    "assetDepends": {
+      "project": "project-FpG6p8j4ZY3X4KGQB9KK5zZf",
+      "folder": "/assets",
+      "name": "ewels/multiqc:1.8",
+      "version": "0.0.1"
+    },
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
@@ -50,7 +56,7 @@
     ]
   },
   "regionalOptions": {
-    "aws:us-east-1": {
+    "aws:eu-central-1": {
       "systemRequirements": {
         "*": {
           "instanceType": "mem1_ssd1_v2_x4"
