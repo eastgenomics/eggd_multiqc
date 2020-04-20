@@ -28,18 +28,20 @@ main() {
 
     # Download config file and 
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    dx download "$project_for_multiqc" -o project_for_multiqc
+
 
     # Fill in your application code here.
 
-    # Call multiqc v1.8 from docker image saved as asset in 001_References (ewels_multiqc_v1.8).
-    # MultiQC is run with the following parameters :
-    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # Here, the directory 'sandbox' is mapped to the /home/dnanexus directory, and passed to
     # multiqc to search for QC files. Docker passes any new files back to this mapped location on the DNAnexus worker.
-    docker run ewels/multiqc:1.8 multiqc sandbox/ \
-        -n sandbox/${outdir}/${project}-multiqc.html -c sandbox/multiqc_config.yaml
+    # Call multiqc v1.8 from docker image saved as asset in 001_References (ewels_multiqc_v1.8).
+    # MultiQC is run with the following parameters :
+    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    dx-docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/ \
+        -n sandbox/${outdir}/${project}-multiqc.html -c $eggd_multiqc_config_file
 
 
     # The following line(s) use the dx command-line tool to upload your file
