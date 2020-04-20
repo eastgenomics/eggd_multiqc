@@ -20,17 +20,7 @@ main() {
 
     echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
     # SET VARIABLES
-    # Store the API key. Grants the script access to DNAnexus resources
-    # this line definitely NEEDS TO BE UPDATED!!!    
-    API_KEY=$(dx cat project-FQqXfYQ0Z0gqx7XG9Z2b4K43:mokaguys_nexus_auth_key)
-    # Capture the project runfolder name. Names the multiqc HTML input and builds the output file path
-    # it's 003 in testing, but has to be changed to 002 for production!
-    project=$(echo $project_for_multiqc | sed 's/003_//')
-    # Assign multiqc output directory name to variable and create
-    outdir=out/multiqc/QC/multiqc && mkdir -p ${outdir}
-    # Assing multiqc report output directory name to variable and create
-    report_outdir=out/multiqc_report/QC/multiqc && mkdir -p ${report_outdir}
-
+   
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
@@ -39,7 +29,7 @@ main() {
     # This line is very likely completely wrong, probably use the next from moka-guys??
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
     # Files for multiqc are stored at 'project_for_multiqc:/QC/''. Download the contents of this folder.
-    dx download ${project_for_multiqc}:QC/* --auth ${API_KEY}
+
 
     # Fill in your application code here. below modified from moka-guys:
     # Call multiqc v1.8 from docker image (ewels_multiqc_v1.8).
