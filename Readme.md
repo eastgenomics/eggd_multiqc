@@ -1,19 +1,18 @@
-<!-- dx-header -->
 # eggd_multiqc (DNAnexus Platform App)
 
 multiqc
 ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
 
 ## What does this app do?
-This app runs MultiQC to generate run wide quality control (QC) using the outputs from MokaAMP, MokaPipe and MokaWES pipelines including:
+This app runs MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
 * FastQC 
 
-## What are typical use cases for this app?
+## What are the typical use cases for this app?
 To generate QC reports, this app should be run at the end of an NGS pipeline, when all QC software outputs are available.
 
 ## What data are required for this app to run?
-* project_for_multiQC - The name of the project to be assessed.
-  * This project must have a 'QC' folder in its root directory.
+* project_for_multiQC - The name of the project to be assessed. (like 002_###)
+  //* This project must have a 'QC' folder in its root directory.
 
 ## What does this app output?
 The following outputs are placed in the DNAnexus project under '/QC/multiqc':
@@ -22,14 +21,14 @@ The following outputs are placed in the DNAnexus project under '/QC/multiqc':
 
 ## How does this app work?
 1. The app downloads all files within the QC/ directory of the project. 
-2. The dx_find_and_download function is used to search for specific files, which are downloaded only if found.
+2. A config file is used to search for files with specific name patterns, which are downloaded if found.
 
-5. A dockerised version of MultiQC is used. The docker image is stored on DNAnexus as an asset, which is bundled with the app build. The following commands were used to generate this asset in a cloud workstation:
-    * `docker pull ewels/multiqc:v1.6`
-    * `dx-docker create-asset ewels/multiqc:v1.6`
-    * The asset on DNAnexus was then renamed with the following command: `dx mv ewels\\multiqc\\:v1.6 ewels_multiqc_v1.6`
-6. MultiQC parses all files, including any recognised files in the report.
-7. The MultiQC outputs are uploaded to DNAnexus. 
+3. A dockerised version of MultiQC is used. The docker image is stored on DNAnexus as an asset, which is bundled with the app build. The following commands were used to generate this asset in a cloud workstation:
+    * `docker pull ewels/multiqc:1.8`
+    * `dx-docker create-asset ewels/multiqc:1.8`
+    * The asset on DNAnexus was then renamed with the following command: `dx mv ewels\\multiqc\\:1.8 ewels_multiqc_1.8`
+4. MultiQC parses all files, including any recognised files in the report.
+5. The MultiQC outputs are uploaded to DNAnexus. 
 
 
 This is the source code for an app that runs on the DNAnexus Platform.
