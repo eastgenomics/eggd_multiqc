@@ -26,14 +26,12 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    # This line is very likely completely wrong, probably use the next from moka-guys??
+    # Download config file and 
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
-    # Files for multiqc are stored at 'project_for_multiqc:/QC/''. Download the contents of this folder.
 
+    # Fill in your application code here.
 
-    # Fill in your application code here. below modified from moka-guys:
-    # Call multiqc v1.8 from docker image (ewels_multiqc_v1.8).
-    # This image is an asset on DNAnexus, bundled with the app??? - Sophie
+    # Call multiqc v1.8 from docker image saved as asset in 001_References (ewels_multiqc_v1.8).
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
     # The docker -v flag mounts a local directory to the docker environment in the format:
@@ -51,12 +49,6 @@ main() {
     # to see more options to set metadata.
 
     html_report=$(dx upload html_report --brief)
-
-    # Taken from moka-guys
-    # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv multiqc_config.yaml ${outdir}/${project}-multiqc_data/
-    # Move the multiqc report HTML to the output directory for uploading to the Viapath server
-    mv ${outdir}/${project}-multiqc.html ${report_outdir}
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
