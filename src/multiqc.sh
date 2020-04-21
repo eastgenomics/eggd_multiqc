@@ -26,9 +26,10 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
-    # Download config file and 
+    # Download config file and qc folder
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
-    dx download "$project_for_multiqc" -o project_for_multiqc
+    project=$(echo $project_for_multiqc)
+    dx download "$project_for_multiqc:fastqc/*"
 
 
     # Fill in your application code here.
@@ -40,9 +41,7 @@ main() {
     # Call multiqc v1.8 from docker image saved as asset in 001_References (ewels_multiqc_v1.8).
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    dx-docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/ \
-        -n sandbox/${outdir}/${project}-multiqc.html -c $eggd_multiqc_config_file
-
+    docker load -i ewels%multiqc#1.8.tar 
 
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
