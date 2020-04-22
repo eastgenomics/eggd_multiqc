@@ -10,7 +10,16 @@
       "class": "file",
       "optional": false,
       "patterns": [
-        "*"
+        "*.yaml"
+      ],
+      "help": ""
+    },
+    {
+      "name": "project_for_multiqc",
+      "class": "string",
+      "optional": false,
+      "patterns": [
+        "project-*"
       ],
       "help": ""
     }
@@ -39,12 +48,12 @@
         "hours": 24
       }
     },
-    "assetDepends": {
-      "project": "project-FpG6p8j4ZY3X4KGQB9KK5zZf",
+    "assetDepends": [{
+      "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
       "folder": "/assets",
       "name": "ewels/multiqc:1.8",
       "version": "0.0.1"
-    },
+      }],
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
