@@ -11,21 +11,17 @@
 #
 # Any code outside of main() (or any entry point you may add) is
 # ALWAYS executed, followed by running the entry point itself.
-#
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
 main() {
 
-    #echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
-   
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
     
-    # SET VARIABLES
     # Download the config file and qc files into 'inputs' folder
     mkdir inputs
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
@@ -42,14 +38,14 @@ main() {
     # Fill in your application code here.
     
     # Load the tar-zipped docker image
-    docker load -i multiqc_v1.8.tar
+    image=$(dx describe "$multiqc_docker_image" --name)
+    docker load -i ${image} #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
     docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}.html -c /home/dnanexus/eggd_multiqc_config_file
 
-    
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
     # that you have used the output field name for the filename for each output,
