@@ -28,20 +28,23 @@ main() {
     
     # Download config file and qc files into 'inputs' folder
     mkdir inputs
-    dx download "$eggd_multiqc_config_file" -o ./inputs/
+    dx download "$eggd_multiqc_config_file"
     dx download "$project_for_multiqc:fastqc/*" -o ./inputs/
-    
+    dx download "$multiqc_docker_image"
+
     outdir=out/multiqc && mkdir -p ${outdir}
     project=$(echo $project_for_multiqc | sed 's/003_//')
 
+    ls
     ls inputs
     # Fill in your application code here.
     # Enable docker daemon to allow connection to Docker
-    dockerd & #this might not be needed as in logs it says docker is already running
+    #dockerd & #this might not be needed as in logs it says docker is already running
     # Pull the lates multiqc image from ewels
-    docker pull ewels/multiqc:1.8
+    #docker pull ewels/multiqc:1.8
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    docker load "$multiqc_docker_image"
     docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/inputs \
      -n sandbox/outdir/$project-multiqc.html -c sandbox/inputs/multiqc_config.yaml 
     
