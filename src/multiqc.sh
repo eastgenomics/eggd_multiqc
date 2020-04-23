@@ -28,10 +28,19 @@ main() {
     # "$variable" --name".
 
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    mkdir out
+    dx download "$project_for_multiqc:output/X011281_metrics/*" -o ./out/
+    #dx ls
+
+    #for i in "$project_for_multiqc:output/*"; do
+    #echo $i
+    #dx download "$i/*" #-o $project_for_multiqc:output/*/*
+    #done
     
-    dx ls
-    dx download "$project_for_multiqc:output/*/*" #-o $project_for_multiqc:output/*/*
-    dx ls
+    #dx ls
+
+    #ls
+
     #dx download /output/*.txt -r -a -o /output/*.txt
 
     # Fill in your application code here.
@@ -49,6 +58,13 @@ main() {
     # will be AppInternalError with a generic error message.
 
     #dx docker run -v ewels/multiqc:1.8 multiqc ./output -n ./multiQC -c "$eggd_multiqc_config_file"
+
+    dockerd &
+
+    docker pull ewels/multiqc:1.8
+    mkdir outdir
+    docker run ewels/multiqc:1.8 multiqc ./out/ -n ./outdir \ 
+    -c /home/dnanexus/eggd_multiqc_config_file 
 
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes

@@ -19,7 +19,7 @@
       "class": "string",
       "optional": false,
       "patterns": [
-        "project-*"
+        "*"
       ],
       "help": ""
     }
@@ -49,9 +49,9 @@
       }
     },
     "assetDepends": [{
-      "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
-      "folder": "/assets",
-      "name": "ewels/multiqc:1.8",
+      "project": "project-FpG6p8j4ZY3X4KGQB9KK5zZf",
+      "folder": "/",
+      "name": "ea5636f992fe",
       "version": "0.0.1"
       }],
     "interpreter": "bash",
