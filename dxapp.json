@@ -49,9 +49,10 @@
       }
     },
     "assetDepends": [{
-      "project": "project-FpG6p8j4ZY3X4KGQB9KK5zZf",
-      "folder": "/",
-      "name": "ea5636f992fe",
+      "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+      "folder": "/assets/",
+      "name": "ewels/multiqc:1.8",
+      "id": "record-FpKj9Qj433GvVgBJ2JgJv2vp",
       "version": "0.0.1"
       }],
     "interpreter": "bash",

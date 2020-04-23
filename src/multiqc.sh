@@ -29,8 +29,10 @@ main() {
 
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
     mkdir out
-    dx download "$project_for_multiqc:output/X011281_metrics/*" -o ./out/
-    #dx ls
+    #dx download "$project_for_multiqc:output/X011281_metrics/*" -r -o ./out/
+    dx download "$project_for_multiqc:fastqc/*" -r -o ./out/
+    dx download project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg
+
 
     #for i in "$project_for_multiqc:output/*"; do
     #echo $i
@@ -59,12 +61,14 @@ main() {
 
     #dx docker run -v ewels/multiqc:1.8 multiqc ./output -n ./multiQC -c "$eggd_multiqc_config_file"
 
-    dockerd &
+    #dockerd &
 
-    docker pull ewels/multiqc:1.8
+    
+    #docker pull ewels/multiqc:1.8
+    docker load -i multiqc_v1.8.tar
+    
     mkdir outdir
-    docker run ewels/multiqc:1.8 multiqc ./out/ -n ./outdir \ 
-    -c /home/dnanexus/eggd_multiqc_config_file 
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outdir/multiqc_out.html -c /home/dnanexus/eggd_multiqc_config_file ./out/
 
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
