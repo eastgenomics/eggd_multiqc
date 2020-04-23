@@ -1,5 +1,5 @@
 {
-  "name": "fast-multiqc",
+  "name": "fast-multiqc-tarball",
   "title": "eggd_fast-multiqc",
   "summary": "Fast-multiqc -  Generates a run-wide FastQC report",
   "dxapi": "1.0.0",

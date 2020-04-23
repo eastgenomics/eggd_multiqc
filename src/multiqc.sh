@@ -36,7 +36,7 @@ main() {
     project=$(echo $project_for_multiqc | sed 's/003_//')
 
     ls
-    ls inputs
+    #ls inputs
     # Fill in your application code here.
     # Enable docker daemon to allow connection to Docker
     #dockerd & #this might not be needed as in logs it says docker is already running
@@ -44,9 +44,10 @@ main() {
     #docker pull ewels/multiqc:1.8
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    docker load "$multiqc_docker_image"
-    docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/inputs \
-     -n sandbox/outdir/$project-multiqc.html -c sandbox/inputs/multiqc_config.yaml 
+    #img =$(echo (dx describe "$multiqc_docker_image" --name))
+    docker load -i multiqc_v1.8.tar
+    #docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/inputs \
+    # -n sandbox/outdir/$project-multiqc.html -c sandbox/inputs/multiqc_config.yaml 
     
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
