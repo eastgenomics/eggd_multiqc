@@ -19,40 +19,36 @@ set -e -x -o pipefail
 main() {
 
     #echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
-    # SET VARIABLES
    
     # The following line(s) use the dx command-line tool to download your file
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
     
-    # Download config file and qc files into 'inputs' folder
+    # SET VARIABLES
+    # Download the config file and qc files into 'inputs' folder
     mkdir inputs
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
     dx download "$project_for_multiqc:fastqc/*" -o ./inputs/
+    # Download the tar-zipped docker image
     dx download "$multiqc_docker_image"
 
-    outdir=out/multiqc && mkdir -p ${outdir}
-    report_outdir=out/multiqc_report && mkdir -p ${report_outdir}
+    # Create the output folders that will be recognised by the job upon completion
+    outdir=out/multiqc_data_files && mkdir -p ${outdir}
+    report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
 
     project=$(echo $project_for_multiqc | sed 's/003_//')
 
     # Fill in your application code here.
-    # Enable docker daemon to allow connection to Docker
-    #dockerd & #this might not be needed as in logs it says docker is already running
-    # Pull the lates multiqc image from ewels
-    #docker pull ewels/multiqc:1.8
-    # MultiQC is run with the following parameters :
-    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    
+    # Load the tar-zipped docker image
     docker load -i multiqc_v1.8.tar
-    #docker run -v /home/dnanexus:/sandbox  -w sandbox ewels/multiqc:1.8 multiqc sandbox/inputs \
-    # -n sandbox/outdir/$project-multiqc.html -c sandbox/inputs/multiqc_config.yaml 
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}.html -c /home/dnanexus/eggd_multiqc_config_file
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
-    # Here, the directory 'sandbox' is mapped to the /home/dnanexus directory, and passed to
-    # multiqc to search for QC files. Docker passes any new files back to this mapped location on the DNAnexus worker.
-    # Call multiqc v1.8 from docker image saved as asset in 001_References (ewels_multiqc_v1.8).
+    # MultiQC is run with the following parameters :
+    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}.html -c /home/dnanexus/eggd_multiqc_config_file
+
     
     # The following line(s) use the dx command-line tool to upload your file
     # outputs after you have created them on the local file system.  It assumes
@@ -62,17 +58,14 @@ main() {
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv eggd_multiqc_config_file ${outdir}/${project}_data/
-    # Move the multiqc report HTML to the output directory for uploading to the Viapath server
+    # Move the multiqc report HTML to the output directory for uploading
     mv ${outdir}/${project}.html ${report_outdir}
 
     # Upload results
     dx-upload-all-outputs
    
-
     #html_report=$(dx upload html_report --brief)
-
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it does.
-
 }
