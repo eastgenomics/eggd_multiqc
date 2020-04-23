@@ -45,7 +45,15 @@
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
-    "file": "src/multiqc.sh"    
+    "file": "src/multiqc.sh",
+    "assetDepends": [
+        {
+            "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+            "folder": "/assets",
+            "name": "ewels/multiqc:1.8",
+            "version": "0.0.1"
+        }
+    ]    
   },
   "access": {
     "allProjects":"VIEW",

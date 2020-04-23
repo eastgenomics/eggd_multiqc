@@ -25,25 +25,25 @@ main() {
     # inputs to the local file system using variable names for the filenames. To
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
-
-    # Download config file and qc folder
-    dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    
+    # Download config file and qc files into 'inputs' folder
     mkdir inputs
-    #project=$(echo $project_for_multiqc)
+    dx download "$eggd_multiqc_config_file" -o ./inputs/
     dx download "$project_for_multiqc:fastqc/*" -o ./inputs/
     
-    outdir=out/multiqc/QC/multiqc && mkdir -p ${outdir}
+    outdir=out/multiqc && mkdir -p ${outdir}
     project=$(echo $project_for_multiqc | sed 's/003_//')
 
+    ls inputs
     # Fill in your application code here.
     # Enable docker daemon to allow connection to Docker
-    dockerd &
+    dockerd & #this might not be needed as in logs it says docker is already running
     # Pull the lates multiqc image from ewels
     docker pull ewels/multiqc:1.8
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
     docker run -v /home/dnanexus:/sandbox ewels/multiqc:1.8 multiqc sandbox/inputs \
-     -n sandbox/outdir/$project-multiqc.html -c sandbox/multiqc_config.yaml 
+     -n sandbox/outdir/$project-multiqc.html -c sandbox/inputs/multiqc_config.yaml 
     
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
