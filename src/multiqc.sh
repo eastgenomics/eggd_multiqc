@@ -17,40 +17,28 @@ set -e -x -o pipefail
 
 main() {
 
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
-    
     # Download the config file and qc files into 'inputs' folder
     mkdir inputs
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
     dx download "$project_for_multiqc:fastqc/*" -o ./inputs/
     # Download the tar-zipped docker image
     dx download "$multiqc_docker_image"
+    image=$(dx describe "$multiqc_docker_image" --name)
 
     # Create the output folders that will be recognised by the job upon completion
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
-
     project=$(echo $project_for_multiqc | sed 's/003_//')
 
     # Fill in your application code here.
     
     # Load the tar-zipped docker image
-    image=$(dx describe "$multiqc_docker_image" --name)
     docker load -i ${image} #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
     docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}.html -c /home/dnanexus/eggd_multiqc_config_file
-
-    # The following line(s) use the dx command-line tool to upload your file
-    # outputs after you have created them on the local file system.  It assumes
-    # that you have used the output field name for the filename for each output,
-    # but you can change that behavior to suit your needs.  Run "dx upload -h"
-    # to see more options to set metadata.
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv eggd_multiqc_config_file ${outdir}/${project}_data/
