@@ -27,64 +27,41 @@ main() {
     # recover the original filenames, you can use the output of "dx describe
     # "$variable" --name".
 
+    # get the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+
+    # get all the QC files (here stored in the output folder) and put into 'out'
     mkdir out
-    #dx download "$project_for_multiqc:output/X011281_metrics/*" -r -o ./out/
-    dx download "$project_for_multiqc:fastqc/*" -r -o ./out/
+    for i in $(dx ls $project_for_multiqc:output); do
+      dx download $project_for_multiqc:output/"$i"/* -o ./out/
+    done
+    
+    # get the multiqc docker image (stored in 001)
     dx download project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg
 
-
-    #for i in "$project_for_multiqc:output/*"; do
-    #echo $i
-    #dx download "$i/*" #-o $project_for_multiqc:output/*/*
-    #done
-    
-    #dx ls
-
-    #ls
-
-    #dx download /output/*.txt -r -a -o /output/*.txt
-
-    # Fill in your application code here.
-    #
-    # To report any recognized errors in the correct format in
-    # $HOME/job_error.json and exit this script, you can use the
-    # dx-jobutil-report-error utility as follows:
-    #
-    #   dx-jobutil-report-error "My error message"
-    #
-    # Note however that this entire bash script is executed with -e
-    # when running in the cloud, so any line which returns a nonzero
-    # exit code will prematurely exit the script; if no error was
-    # reported in the job_error.json file, then the failure reason
-    # will be AppInternalError with a generic error message.
-
-    #dx docker run -v ewels/multiqc:1.8 multiqc ./output -n ./multiQC -c "$eggd_multiqc_config_file"
-
-    #dockerd &
-
-    
-    #docker pull ewels/multiqc:1.8
+    # load the multiqc docker image
     docker load -i multiqc_v1.8.tar
     
+    # make a folder to put the output in, and run multiqc
+    # -v maps the dnanexus directory to the docker directory, -w specifies the working directory
+    # -n is the location for multiqc output, -c is the path to the config file
     mkdir outdir
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outdir/multiqc_out.html -c /home/dnanexus/eggd_multiqc_config_file ./out/
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outdir/html_report -c /home/dnanexus/eggd_multiqc_config_file ./out/
 
-    # The following line(s) use the dx command-line tool to upload your file
-    # outputs after you have created them on the local file system.  It assumes
-    # that you have used the output field name for the filename for each output,
-    # but you can change that behavior to suit your needs.  Run "dx upload -h"
-    # to see more options to set metadata.
+    # upload output back to dnanexus
+    #dx-upload-all-outputs
 
-    html_report=$(dx upload html_report --brief)
+    dx upload outdir/* -r --path $project_for_multiqc:multiqc
+
+    #html_report=$(dx upload html_report --brief)
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    dx-jobutil-add-output html_report "$html_report" --class=file
-    for i in "${!multiqc_data_files[@]}"; do
-        dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
-    done
+    #dx-jobutil-add-output html_report "$html_report" --class=file
+    #for i in "${!multiqc_data_files[@]}"; do
+    #    dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
+    #done
 }
