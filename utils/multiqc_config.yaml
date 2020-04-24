@@ -58,8 +58,13 @@ max_table_rows: 500              # Swap tables for a beeswarm plot above this
 sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
+    verifybamid/selfsm:
+        fn: '*.selfSM'
+    samtools/flagstat:
+        contents: 'in total (QC-passed reads + QC-failed reads)'
+        shared: true
 
 # Overwrite the defaults of which table columns are visible by default
-    FastQC:
-        percent_fails: False
-        total_sequences: True
+#    FastQC:
+#        percent_fails: False
+#        total_sequences: True
