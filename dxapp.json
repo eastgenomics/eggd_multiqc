@@ -1,7 +1,7 @@
 {
-  "name": "fast-multiqc_final",
-  "title": "eggd_fast-multiqc",
-  "summary": "Fast-multiqc -  Generates a run-wide FastQC report",
+  "name": "multiqc_sophie",
+  "title": "eggd_multiqc",
+  "summary": "Multiqc -  Generates a run-wide FastQC, verifybamid report",
   "dxapi": "1.0.0",
   "version": "1.0.0",
   "properties": {
@@ -16,17 +16,17 @@
       "patterns": ["*.yaml"]
     },
     {
-      "name": "multiqc_docker_image",
-      "label": "docker image",
-      "optional": false,
-      "class": "file",
-      "patterns": ["*.tar"]
-    },
-    {
       "name": "project_for_multiqc",
       "label": "project to get the MultiQC treatment",
       "help": "The project to get the MultiQC treatment",
       "class": "string"
+    },
+    {
+      "name": "multiqc_docker_image",
+      "label": "docker image",
+      "optional": true,
+      "class": "file",
+      "patterns": ["*.tar"]
     }
   ],
   "outputSpec": [

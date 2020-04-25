@@ -20,30 +20,35 @@ main() {
     # Download the config file and qc files into 'inputs' folder
     mkdir inputs
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
-    dx download "$project_for_multiqc:fastqc/*" -o ./inputs/
-    # Download the tar-zipped docker image
-    dx download "$multiqc_docker_image"
-    image=$(dx describe "$multiqc_docker_image" --name)
+    dx download "$project_for_multiqc:fastqc/*" -o ./inputs/ # download fastqc reports
+    dx download "$project_for_multiqc:verifybamid/*" -o ./inputs/ # download verifybamid reports
+    
+    # Download the tar-zipped docker image either from input or default
+    if [ -f "$multiqc_docker_image" ]; then
+        dx download "$multiqc_docker_image"
+        image=$(dx describe "$multiqc_docker_image" --name)
+    else
+        dx download project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg
+        image=$(dx describe project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg --name)
+    fi
 
     # Create the output folders that will be recognised by the job upon completion
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
     project=$(echo $project_for_multiqc | sed 's/003_//')
-
-    # Fill in your application code here.
-    
+  
     # Load the tar-zipped docker image
     docker load -i ${image} #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}.html -c /home/dnanexus/eggd_multiqc_config_file
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inputs/ -n ./${outdir}/${project}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv eggd_multiqc_config_file ${outdir}/${project}_data/
+    mv eggd_multiqc_config_file ${outdir}/${project}-multiqc_data/
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/${project}.html ${report_outdir}
+    mv ${outdir}/${project}-multiqc.html ${report_outdir}
 
     # Upload results
     dx-upload-all-outputs

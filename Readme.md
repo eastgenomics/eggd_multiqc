@@ -6,6 +6,8 @@ ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
 ## What does this app do?
 This app runs MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
 * FastQC 
+* verifybamid
+* samtools/flagstat - to come soon
 
 ## What are the typical use cases for this app?
 To generate QC reports, this app should be run at the end of an NGS pipeline, when all QC software outputs are available.
@@ -13,6 +15,7 @@ To generate QC reports, this app should be run at the end of an NGS pipeline, wh
 ## What data are required for this app to run?
 * project_for_multiQC - The name of the project to be assessed. (like 002_###)
   //* This project must have a 'QC' folder in its root directory.
+* config_file.yaml - A config file specifying which modules to run and the search pattern to recognise for each module
 
 ## What does this app output?
 The following outputs are placed in the DNAnexus project under '/QC/multiqc':
