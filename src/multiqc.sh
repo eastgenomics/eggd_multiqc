@@ -18,11 +18,16 @@ set -e -x -o pipefail
 main() {
 
     # Download the config file and qc files into 'inputs' folder
-    mkdir inputs
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
-    dx download "$project_for_multiqc:fastqc/*" -o ./inputs/ # download fastqc reports
-    dx download "$project_for_multiqc:verifybamid/*" -o ./inputs/ # download verifybamid reports
-    
+    mkdir inputs
+    for i in $(dx ls $project_for_multiqc:qc); do
+      dx download $project_for_multiqc:qc/"$i"/* -o ./inputs/
+    done
+
+    #dx download "$project_for_multiqc:fastqc/*" -o ./inputs/ # download fastqc reports
+    #dx download "$project_for_multiqc:verifybamid/*" -o ./inputs/ # download verifybamid reports
+    #dx download "$project_for_multiqc:flagstat/*" -o ./inputs/ # download flagstat reports
+
     # Download the tar-zipped docker image either from input or default
     if [ -f "$multiqc_docker_image" ]; then
         dx download "$multiqc_docker_image"
