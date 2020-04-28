@@ -37,31 +37,30 @@ main() {
     done
     
     # get the multiqc docker image (stored in 001)
-    dx download project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg
-
-    # load the multiqc docker image
-    docker load -i multiqc_v1.8.tar
+    dx download "$docker_image" -o docker_image
     
+    # load the multiqc docker image
+    docker load -i docker_image
+        
     # make a folder to put the output in, and run multiqc
     # -v maps the dnanexus directory to the docker directory, -w specifies the working directory
     # -n is the location for multiqc output, -c is the path to the config file
     mkdir outdir
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outdir/html_report -c /home/dnanexus/eggd_multiqc_config_file ./out/
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outdir/${project_for_multiqc}_multiqc_report -c /home/dnanexus/eggd_multiqc_config_file ./out/
 
     # upload output back to dnanexus
     #dx-upload-all-outputs
 
-    dx upload outdir/* -r --path $project_for_multiqc:multiqc
-
-    #html_report=$(dx upload html_report --brief)
+    dx upload outdir/* -r --path $project_for_multiqc:${outdir}
 
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
     # class.  Run "dx-jobutil-add-output -h" for more information on what it
     # does.
 
-    #dx-jobutil-add-output html_report "$html_report" --class=file
-    #for i in "${!multiqc_data_files[@]}"; do
-    #    dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
-    #done
+    dx-jobutil-add-output ${html_report} ./outdir/${project_for_multiqc}_multiqc_report.html --class=file
+    data_files=./outdir/${project_for_multiqc}_multiqc_report_data/*
+    for i in "${!data_files[@]}"; do
+        dx-jobutil-add-output ${multiqc_data_files} "${data_files[$i]}" --class=array:file
+    done
 }

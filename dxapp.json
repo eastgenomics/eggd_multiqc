@@ -22,6 +22,15 @@
         "*"
       ],
       "help": ""
+    },
+    {
+      "name": "docker_image",
+      "class": "file",
+      "optional": false,
+      "patterns": [
+        "*.tar"
+      ],
+      "help": ""
     }
   ],
   "outputSpec": [
