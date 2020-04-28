@@ -1,5 +1,5 @@
 {
-  "name": "multiqc_sophie",
+  "name": "multiqc_S",
   "title": "eggd_multiqc",
   "summary": "Multiqc -  Generates a run-wide FastQC, verifybamid and flagstat report",
   "dxapi": "1.0.0",
@@ -24,7 +24,7 @@
     {
       "name": "multiqc_docker_image",
       "label": "docker image",
-      "optional": true,
+      "optional": false,
       "class": "file",
       "patterns": ["*.tar"]
     }

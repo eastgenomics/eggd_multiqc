@@ -23,25 +23,19 @@ main() {
     for i in $(dx ls $project_for_multiqc:qc); do
       dx download $project_for_multiqc:qc/"$i"/* -o ./inputs/
     done
-
     #dx download "$project_for_multiqc:fastqc/*" -o ./inputs/ # download fastqc reports
     #dx download "$project_for_multiqc:verifybamid/*" -o ./inputs/ # download verifybamid reports
     #dx download "$project_for_multiqc:flagstat/*" -o ./inputs/ # download flagstat reports
 
-    # Download the tar-zipped docker image either from input or default
-    if [ -f "$multiqc_docker_image" ]; then
-        dx download "$multiqc_docker_image"
-        image=$(dx describe "$multiqc_docker_image" --name)
-    else
-        dx download project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg
-        image=$(dx describe project-FpG6p8j4ZY3X4KGQB9KK5zZf:file-FpQg5fj4g59gqqfK3gGkFVQg --name)
-    fi
-
     # Create the output folders that will be recognised by the job upon completion
+    project=$(echo $project_for_multiqc | sed 's/003_//')
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
-    project=$(echo $project_for_multiqc | sed 's/003_//')
   
+    # Download the tar-zipped docker image either from input or default
+    dx download "$multiqc_docker_image" #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
+    image=$(dx describe "$multiqc_docker_image" --name)
+
     # Load the tar-zipped docker image
     docker load -i ${image} #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
