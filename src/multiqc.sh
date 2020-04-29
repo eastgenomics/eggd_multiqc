@@ -23,7 +23,7 @@ main() {
     # get all the QC files (here stored in qc and qc/output folder) and put into 'inp'
     mkdir inp
     for i in $(dx ls $project_for_multiqc:qc); do
-      if [$i == "output"]; then
+      if [ $i == "output/" ]; then
         for j in $(dx ls $project_for_multiqc:qc/output); do
           dx download $project_for_multiqc:qc/output/"$j"/* -o ./inp/
         done
