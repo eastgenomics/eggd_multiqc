@@ -44,6 +44,8 @@ extra_fn_clean_exts:
     - type: remove
       pattern: '.markdup'
     - type: remove
+      pattern: '_markdup'
+    - type: remove
       pattern: '.duplication' 
     - type: remove
       pattern: '.realigned'
@@ -119,6 +121,11 @@ sp:
         shared: true
     picard/quality_score_distribution:
         contents: '--algo QualDistribution'
+        shared: true
+    verifybamid/selfsm:
+        fn: '*.selfSM'
+    samtools/flagstat:
+        contents: 'in total (QC-passed reads + QC-failed reads)'
         shared: true
 
 # # Specify a custom logo to add to reports (uncomment to use)
