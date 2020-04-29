@@ -8,6 +8,7 @@ This app runs MultiQC to generate run wide quality control (QC) using the output
 * FastQC 
 * verifybamid
 * samtools/flagstat
+* sentieonPicard
 
 ## What are the typical use cases for this app?
 To generate QC reports, this app should be run at the end of an NGS pipeline, when all QC software outputs are available.

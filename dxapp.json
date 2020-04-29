@@ -1,7 +1,7 @@
 {
-  "name": "multiqc_S",
+  "name": "multiqc_4modules",
   "title": "eggd_multiqc",
-  "summary": "Multiqc -  Generates a run-wide FastQC, verifybamid and flagstat report",
+  "summary": "Multiqc -  Generates a run-wide FastQC, verifybamid, sentieonPicard and flagstat report",
   "dxapi": "1.0.0",
   "version": "1.0.0",
   "properties": {

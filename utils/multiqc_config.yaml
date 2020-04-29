@@ -1,6 +1,9 @@
 #######################################
-#  MultiQC Configuration File for fastQC
+# Example MultiQC Configuration File
 #######################################
+
+# This file can be saved either in the MultiQC installation
+# directory, or as ~/.multiqc_config.yaml
 
 # Configuration settings are taken from the following locations, in order:
 # - Hardcoded in MultiQC (multiqc/utils/config.py)
@@ -8,16 +11,20 @@
 # - ~/.multiqc_config.yaml
 # - Command line options
 
+# Note that all of the values below are set to the MultiQC defaults.
+# It's recommended that you delete any that you don't need.
+
+---
 # Title to use for the report.
 title: null
 
-# Default output filenames
-output_fn_name: 'multiqc_report.html'
-data_dir_name: 'multiqc_data'
-
 # Prepend sample names with their directory. Useful if analysing the
 # sample samples with different parameters.
-prepend_dirs: false
+prepend_dirs: False
+
+# Default output filenames
+output_fn_name: multiqc_report.html
+data_dir_name: multiqc_data
 
 # Whether to create the parsed data directory in addition to the report
 make_data_dir: True
@@ -25,16 +32,50 @@ make_data_dir: True
 # Cleaning options for sample names. Typically, sample names are detected
 # from an input filename. If any of these strings are found, they and any
 # text to their right will be discarded.
+# For example - file1.fq.gz_trimmed.bam_deduplicated_fastqc.zip
+# would be cleaned to 'file1'
 # Two options here - fn_clean_exts will replace the defaults,
-## extra_fn_clean_exts will append to the defaults
-extra_fn_clean_exts: #applicable to all
-#    - type: 'replace' / 'remove'
-#      pattern: 'NGS95a_'     
+# extra_fn_clean_exts will append to the defaults
+extra_fn_clean_exts:
+#    - type: 'replace'
+#      pattern: 'NGS95a_'
+    - type: remove
+      pattern: '_001'      
+    - type: remove
+      pattern: '.markdup'
     - type: remove
       pattern: '_markdup'
+    - type: remove
+      pattern: '.duplication' 
+    - type: remove
+      pattern: '.realigned'
+    - type: remove
+      pattern: '_metrics'
+
+    # - .gz
+    # - .fastq
+    # - .fq
+    # - .bam
+    # - .sam
+    # - .sra
+    # - _tophat
+    # - _star_aligned
+    # - _fastqc
+    # - type: replace
+    #   pattern: '.sorted'
+    # - type: regex
+    #   pattern: '^Sample_\d+'
+
+# Ignore these files / directories / paths when searching for logs
+# fn_ignore_files:
+#     - .DS_Store
+# fn_ignore_dirs:
+#     - annoying_dirname
+# fn_ignore_paths:
+#     - '*/path/to/*_files/'
 
 # Ignore files larger than this when searcing for logs (bytes)
-log_filesize_limit: 5000000
+log_filesize_limit: 50000000
 
 # MultiQC skips a couple of debug messages when searching files as the
 # log can get very verbose otherwise. Re-enable here to help debugging.
@@ -60,13 +101,82 @@ max_table_rows: 500              # Swap tables for a beeswarm plot above this
 sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
+    picard/alignment_metrics:
+        contents: '--algo AlignmentStat'
+        #fn: '*.AlignmentStat_metrics.txt'
+        shared: true
+    picard/insertsize:
+        contents: '--algo InsertSizeMetricAlgo'
+        #fn: '*.InsertSize_metrics.txt'
+        shared: true
+    picard/markdups:
+        fn: '*.Duplication_metrics.txt'
+        shared: true
+    picard/gcbias:
+        contents: '--algo GCBias'
+        #fn: '*.GCBias_metrics.txt'
+        shared: true
+    picard/quality_by_cycle:
+        contents: '--algo MeanQualityByCycle'
+        shared: true
+    picard/quality_score_distribution:
+        contents: '--algo QualDistribution'
+        shared: true
     verifybamid/selfsm:
         fn: '*.selfSM'
     samtools/flagstat:
         contents: 'in total (QC-passed reads + QC-failed reads)'
         shared: true
 
+# # Specify a custom logo to add to reports (uncomment to use)
+# custom_logo: null         # '/path/to/logo.png'
+# custom_logo_url: null     # 'https://www.example.com'
+# custom_logo_title: null   # 'Our Institute Name'
+# subtitle: null            # Grey text below title
+# intro_text: null          # Set to False to remove, or your own text
+
+# # Add generic information to the top of reports
+# report_header_info:
+#     - Example Config:: 'This is arbitrary'
+#     - Another field:: 'Loaded from <code>multiqc_config_example.yaml</code>'
+#     - Something different:: 'You can put any key-value pairs here'
+#     - Want to know more?: 'See the <a href="http://multiqc.info/docs" target="_blank">MultiQC docs</a>'
+
 # Overwrite the defaults of which table columns are visible by default
-#    FastQC:
-#        percent_fails: False
-#        total_sequences: True
+table_columns_visible:
+    bcl2fastq:
+        total: False
+    FastQC:
+        percent_fails: False
+        total_sequences: True
+    Peddy:
+        family_id: False
+        ancestry-prediction: False
+        ancestry-prob_het_check: False
+        predicted_sex_sex_check: False
+        predicted_sex_sex_check: False    
+        sex_het_ratio: True
+        sex_error: True
+    verifyBAMID:
+        CHIPMIX: False
+
+# Set picard configs
+picard_config:
+    general_stats_target_coverage:
+        - 30
+
+# Set conditional formatting rules for general stats FREEMIX
+table_cond_formatting_rules:
+    mqc-generalstats-verifybamid-FREEMIX:
+        fail:
+            - gt: 2
+            - eq: 2
+        pass:
+            - lt: 2
+
+# Remove plots from HTML report
+remove_sections:
+    # For peddy, keep only the sex-check plot
+    - peddy-pca-plot
+    - peddy-relatedness-plot
+    - peddy-hetcheck-plot
