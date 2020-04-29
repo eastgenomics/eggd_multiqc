@@ -19,25 +19,23 @@ main() {
 
     # Download the config file and qc files into 'inputs' folder
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    
     mkdir inputs
-    for i in $(dx ls $project_for_multiqc:qc); do
-      dx download $project_for_multiqc:qc/"$i"/* -o ./inputs/
+    for i in $(dx ls "$project_for_multiqc:/output/$workflow_for_multiqc"); do
+      dx download $project_for_multiqc:output/$workflow_for_multiqc/$i/* -o ./inputs/
     done
-    #dx download "$project_for_multiqc:fastqc/*" -o ./inputs/ # download fastqc reports
-    #dx download "$project_for_multiqc:verifybamid/*" -o ./inputs/ # download verifybamid reports
-    #dx download "$project_for_multiqc:flagstat/*" -o ./inputs/ # download flagstat reports
-
+    #003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
+    
     # Create the output folders that will be recognised by the job upon completion
     project=$(echo $project_for_multiqc | sed 's/003_//')
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
   
     # Download the tar-zipped docker image either from input or default
-    dx download "$multiqc_docker_image" #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
-    image=$(dx describe "$multiqc_docker_image" --name)
-
+    dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
     # Load the tar-zipped docker image
-    docker load -i ${image} #multiqc_v1.8.tar
+    docker load -i docker_image #multiqc_v1.8.tar
+    
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
