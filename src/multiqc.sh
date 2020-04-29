@@ -11,62 +11,54 @@
 #
 # Any code outside of main() (or any entry point you may add) is
 # ALWAYS executed, followed by running the entry point itself.
-#
-# See https://documentation.dnanexus.com/developer for tutorials on how
-# to modify this file.
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
 main() {
 
-    echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
-
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
-
-    # get the config file
+    # Download the config file and qc files into 'inputs' folder
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
-    # get all the QC files (here stored in the output folder) and put into 'out'
+    # get all the QC files (here stored in qc and qc/output folder) and put into 'inp'
     mkdir inp
-    for i in $(dx ls $project_for_multiqc:output); do
-      dx download $project_for_multiqc:output/"$i"/* -o ./inp/
+    for i in $(dx ls $project_for_multiqc:qc); do
+      if [$i == "output"]; then
+        for j in $(dx ls $project_for_multiqc:qc/output); do
+          dx download $project_for_multiqc:qc/output/"$j"/* -o ./inp/
+        done
+      else
+        dx download $project_for_multiqc:qc/"$i"/* -o ./inp/
+      fi
     done
 
-    # get the multiqc docker image (stored in 001)
-    dx download "$docker_image" -o docker_image
+    # Download the tar-zipped docker image either from input or default
+    dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
 
-    # load the multiqc docker image
-    docker load -i docker_image
+    # Load the tar-zipped docker image
+    docker load -i docker_image #multiqc_v1.8.tar
+    
+    # Create the output folders that will be recognised by the job upon completion
+    project=$(echo $project_for_multiqc | sed 's/003_//')
+    outdir=out/multiqc_data_files && mkdir -p ${outdir}
+    report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
+ 
+    # The docker -v flag mounts a local directory to the docker environment in the format:
+    #    -v local_dir:docker_dir
+    # MultiQC is run with the following parameters :
+    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${project}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
 
-    # make a folder to put the output in, and run multiqc
-    # -v maps the dnanexus directory to the docker directory, -w specifies the working directory
-    # -n is the location for multiqc output, -c is the path to the config file
-    mkdir outp
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 -n ./outp/${project_for_multiqc}_multiqc_report -c /home/dnanexus/eggd_multiqc_config_file ./inp/
+    # Move the config file to the multiqc data output folder. This was created by running multiqc
+    mv eggd_multiqc_config_file ${outdir}/${project}-multiqc_data/
+    # Move the multiqc report HTML to the output directory for uploading
+    mv ${outdir}/${project}-multiqc.html ${report_outdir}
 
-    # move output to directories DNAnexus will recognise
-    mkdir -p out/multiqc_data_files
-    mkdir -p out/html_report
-    mv ./outp/${project_for_multiqc}_multiqc_report.html out/html_report
-    mv ./outp/${project_for_multiqc}_multiqc_report_data/* out/multiqc_data_files
-
-    # upload output back to dnanexus
+    # Upload results
     dx-upload-all-outputs
-    #html_report=$(dx upload ./out/${project_for_multiqc}_multiqc_report.html --path $project_for_multiqc:${outdir})
-    #multiqc_data_files=$(dx upload ./out/${project_for_multiqc}_multiqc_report_data/* -r --path $project_for_multiqc:${outdir})
-
+   
+    #html_report=$(dx upload html_report --brief)
     # The following line(s) use the utility dx-jobutil-add-output to format and
     # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
-
-    #dx-jobutil-add-output html_report "$html_report" --class=file
-    #data_files=./out/${project_for_multiqc}_multiqc_report_data/*
-    #for i in "${!multiqc_data_files[@]}"; do
-    #    dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
-    #done
+    # class.  Run "dx-jobutil-add-output -h" for more information on what it does.
 }
