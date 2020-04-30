@@ -1,5 +1,5 @@
 {
-  "name": "multiqc_4modules",
+  "name": "multiqc_all4",
   "title": "eggd_multiqc",
   "summary": "Multiqc -  Generates a run-wide FastQC, verifybamid, sentieonPicard and flagstat report",
   "dxapi": "1.0.0",
@@ -16,17 +16,23 @@
       "patterns": ["*.yaml"]
     },
     {
+      "name": "multiqc_docker_image",
+      "label": "docker image",
+      "optional": false,
+      "class": "file",
+      "patterns": ["*.tar"]
+    },
+    {
       "name": "project_for_multiqc",
       "label": "project to get the MultiQC treatment",
       "help": "The project to get the MultiQC treatment",
       "class": "string"
     },
     {
-      "name": "multiqc_docker_image",
-      "label": "docker image",
-      "optional": false,
-      "class": "file",
-      "patterns": ["*.tar"]
+      "name": "workflow_for_multiqc",
+      "label": "workflow run to get the MultiQC treatment",
+      "help": "The run to get the MultiQC treatment",
+      "class": "string"
     }
   ],
   "outputSpec": [

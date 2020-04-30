@@ -20,18 +20,17 @@ main() {
     # Download the config file and qc files into 'inputs' folder
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
-    # get all the QC files (here stored in qc and qc/output folder) and put into 'inp'
+    # get all the QC files (stored in output/app/? folder) and put into 'inp'
+    # eg. 003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
-    for i in $(dx ls $project_for_multiqc:qc); do
-      if [ $i == "output/" ]; then
-        for j in $(dx ls $project_for_multiqc:qc/output); do
-          dx download $project_for_multiqc:qc/output/"$j"/* -o ./inp/
-        done
-      else
-        dx download $project_for_multiqc:qc/"$i"/* -o ./inp/
-      fi
-    done
+    dx download $project_for_multiqc:/output/$workflow_for_multiqc/fastqc/* -o ./inp/
+    dx download $project_for_multiqc:/output/$workflow_for_multiqc/samtools_flagstat_v1.0.0/* -o ./inp/
+    dx download $project_for_multiqc:/output/$workflow_for_multiqc/verifybamid_v2.0.0/QC/*  -o ./inp/
 
+    for sample in $(dx ls $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq" --folders); do
+        dx download $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq"/$sample/* -o ./inp/
+    done
+    
     # Download the tar-zipped docker image either from input or default
     dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
 
