@@ -51,7 +51,10 @@ extra_fn_clean_exts:
       pattern: '_metrics'
     - type: remove
       pattern: '.Duplication_metrics'
-
+    - type: remove
+      pattern: '.Duplication'
+    - type: remove
+      pattern: '.duplication'
     # - .gz
     # - .fastq
     # - .fq
