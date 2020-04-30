@@ -42,7 +42,7 @@ main() {
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
-    
+
     # Download the tar-zipped docker image either from input or default
     dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
 
@@ -50,7 +50,7 @@ main() {
     docker load -i docker_image #multiqc_v1.8.tar
     
     # Create the output folders that will be recognised by the job upon completion
-    project=$(echo $project_for_multiqc | sed 's/003_//')
+    workflow=$(echo $workflow_for_multiqc | sed 's/003_//')
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
@@ -58,12 +58,12 @@ main() {
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${project}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
+    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv eggd_multiqc_config_file ${outdir}/${project}-multiqc_data/
+    mv eggd_multiqc_config_file ${outdir}/${workflow}-multiqc_data/
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/${project}-multiqc.html ${report_outdir}
+    mv ${outdir}/${workflow}-multiqc.html ${report_outdir}
 
     # Upload results
     dx-upload-all-outputs
