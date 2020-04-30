@@ -23,12 +23,24 @@ main() {
     # get all the QC files (stored in output/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
-    dx download $project_for_multiqc:/output/$workflow_for_multiqc/fastqc/* -o ./inp/
-    dx download $project_for_multiqc:/output/$workflow_for_multiqc/samtools_flagstat_v1.0.0/* -o ./inp/
-    dx download $project_for_multiqc:/output/$workflow_for_multiqc/verifybamid_v2.0.0/QC/*  -o ./inp/
+    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/fastqc/* -o ./inp/
+    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/samtools_flagstat_v1.0.0/* -o ./inp/
+    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/verifybamid_v2.0.0/QC/*  -o ./inp/
+    # for sample in $(dx ls $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq" --folders); do
+    #     dx download $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq"/$sample/* -o ./inp/
+    # done
 
-    for sample in $(dx ls $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq" --folders); do
-        dx download $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq"/$sample/* -o ./inp/
+    wfdir="$project_for_multiqc:/output/$workflow_for_multiqc"
+    for f in $(dx ls ${wfdir} --folders); do
+        if [[ $f == eggd_picardqc_*/ ]] || [[ $f == verifybamid_*/ ]]; then
+            dx download ${wfdir}/"$f"/QC/* -o ./inp/
+        elif [[ $f == sentieon*/ ]]; then
+            for s in $(dx ls ${wfdir}/"$f" --folders); do
+                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+            done
+        elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]]; then
+            dx download ${wfdir}/"$f"/* -o ./inp/
+        fi
     done
     
     # Download the tar-zipped docker image either from input or default
