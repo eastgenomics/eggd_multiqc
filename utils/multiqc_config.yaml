@@ -105,25 +105,22 @@ sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
     picard/alignment_metrics:
-        contents: '--algo AlignmentStat'
-        #fn: '*.AlignmentStat_metrics.txt'
+        fn: '*.AlignmentStat_metrics.txt'
         shared: true
     picard/insertsize:
-        contents: '--algo InsertSizeMetricAlgo'
-        #fn: '*.InsertSize_metrics.txt'
+        fn: '*.InsertSize_metrics.txt'
         shared: true
     picard/markdups:
         fn: '*.Duplication_metrics.txt'
         shared: true
     picard/gcbias:
-        contents: '--algo GCBias'
-        #fn: '*.GCBias_metrics.txt'
+        fn: '*.GCBias_metrics.txt'
         shared: true
     picard/quality_by_cycle:
-        contents: '--algo MeanQualityByCycle'
+        fn: '*.MeanQualityByCycle_metrics.txt'
         shared: true
     picard/quality_score_distribution:
-        contents: '--algo QualDistribution'
+        fn: '*.QualDistribution_metrics.txt'
         shared: true
     verifybamid/selfsm:
         fn: '*.selfSM'
