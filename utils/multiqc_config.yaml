@@ -44,14 +44,17 @@ extra_fn_clean_exts:
     - type: remove
       pattern: '.markdup'
     - type: remove
-      pattern: '_markdup'
-    - type: remove
-      pattern: '.duplication' 
+      pattern: '_markdup' 
     - type: remove
       pattern: '.realigned'
     - type: remove
       pattern: '_metrics'
-
+    - type: remove
+      pattern: '.Duplication_metrics'
+    - type: remove
+      pattern: '.Duplication'
+    - type: remove
+      pattern: '.duplication'
     # - .gz
     # - .fastq
     # - .fq

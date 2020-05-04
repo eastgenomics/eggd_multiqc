@@ -23,13 +23,6 @@ main() {
     # get all the QC files (stored in output/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
-    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/fastqc/* -o ./inp/
-    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/samtools_flagstat_v1.0.0/* -o ./inp/
-    # dx download $project_for_multiqc:/output/$workflow_for_multiqc/verifybamid_v2.0.0/QC/*  -o ./inp/
-    # for sample in $(dx ls $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq" --folders); do
-    #     dx download $project_for_multiqc:/output/$workflow_for_multiqc/"sentieon-dnaseq"/$sample/* -o ./inp/
-    # done
-
     wfdir="$project_for_multiqc:/output/$workflow_for_multiqc"
     for f in $(dx ls ${wfdir} --folders); do
         if [[ $f == eggd_picardqc_*/ ]] || [[ $f == verifybamid_*/ ]]; then
@@ -43,17 +36,15 @@ main() {
         fi
     done
 
-    # Download the tar-zipped docker image either from input or default
-    dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
-
-    # Load the tar-zipped docker image
-    docker load -i docker_image #multiqc_v1.8.tar
-    
     # Create the output folders that will be recognised by the job upon completion
     workflow=$(echo $workflow_for_multiqc | sed 's/003_//')
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
+    # Download the tar-zipped docker image either from input or default
+    dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
+    # Load the tar-zipped docker image
+    docker load -i docker_image #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
