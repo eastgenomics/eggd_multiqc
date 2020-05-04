@@ -29,7 +29,12 @@ main() {
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
         elif [[ $f == sentieon*/ ]]; then
             for s in $(dx ls ${wfdir}/"$f" --folders); do
-                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+                mkdir sent
+                dx download ${wfdir}/"$f"/"$s"/* -o ./sent/
+                for x in $(ls sent); do
+                    sed -i '1d' ./sent/"$x"
+                    mv ./sent/"$x" ./inp/
+                done
             done
         elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
