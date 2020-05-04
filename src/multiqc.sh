@@ -38,7 +38,7 @@ main() {
             for s in $(dx ls ${wfdir}/"$f" --folders); do
                 dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
             done
-        elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]]; then
+        elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
