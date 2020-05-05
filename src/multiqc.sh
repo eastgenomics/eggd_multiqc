@@ -35,6 +35,7 @@ main() {
                     sed -i '1d' ./sent/"$x"
                     mv ./sent/"$x" ./inp/
                 done
+                rm -r sent
             done
         elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
