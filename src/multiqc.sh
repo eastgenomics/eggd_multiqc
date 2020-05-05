@@ -31,26 +31,28 @@ main() {
             for s in $(dx ls ${wfdir}/"$f" --folders); do
                 mkdir sent
                 dx download ${wfdir}/"$f"/"$s"/* -o ./sent/
-                for x in $(ls sent/*GCBias_*); do
+                cd sent
+                for x in $(ls *GCBias_*); do
                     var="## METRICS CLASS    GcBiasMetrics    GcBiasDetailMetrics    INPUT=$x"
-                    sed -i "1s/.*/$var/" ./sent/"$x"
-                    mv ./sent/"$x" ./inp/
+                    sed -i "1s/.*/${var}/" "$x"
+                    mv ./"$x" ../inp/
                 done
-                for x in $(ls sent/*Alignment*); do
+                for x in $(ls *Alignment*); do
                     var="## METRICS CLASS    AlignmentSummaryMetrics    INPUT=$x"
-                    sed -i "1s/.*/$var/" ./sent/"$x"
-                    mv ./sent/"$x" ./inp/
+                    sed -i "1s/.*/${var}/" "$x"
+                    mv ./"$x" ../inp/
                 done
-                for x in $(ls sent/*InsertSize*); do
+                for x in $(ls *InsertSize*); do
                     var="## METRICS CLASS    InsertSizeMetrics    INPUT=$x"
-                    sed -i "1s/.*/$var/" ./sent/"$x"
-                    mv ./sent/"$x" ./inp/
+                    sed -i "1s/.*/${var}/" "$x"
+                    mv ./"$x" ../inp/
                 done
-                for x in $(ls sent/*Duplication*); do
+                for x in $(ls *Duplication*); do
                     var="## METRICS CLASS    DuplicationMetrics    INPUT=$x"
-                    sed -i "1s/.*/$var/" ./sent/"$x"
-                    mv ./sent/"$x" ./inp/
+                    sed -i "1s/.*/${var}/" "$x"
+                    mv ./"$x" ../inp/
                 done
+                cd ..
                 rm -r sent
             done
         elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
