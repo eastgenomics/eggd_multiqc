@@ -31,8 +31,24 @@ main() {
             for s in $(dx ls ${wfdir}/"$f" --folders); do
                 mkdir sent
                 dx download ${wfdir}/"$f"/"$s"/* -o ./sent/
-                for x in $(ls sent); do
-                    sed -i '1d' ./sent/"$x"
+                for x in $(ls sent/*GCBias_*); do
+                    var="## METRICS CLASS    GcBiasMetrics    GcBiasDetailMetrics    INPUT=$x"
+                    sed -i "1s/.*/$var/" ./sent/"$x"
+                    mv ./sent/"$x" ./inp/
+                done
+                for x in $(ls sent/*Alignment*); do
+                    var="## METRICS CLASS    AlignmentSummaryMetrics    INPUT=$x"
+                    sed -i "1s/.*/$var/" ./sent/"$x"
+                    mv ./sent/"$x" ./inp/
+                done
+                for x in $(ls sent/*InsertSize*); do
+                    var="## METRICS CLASS    InsertSizeMetrics    INPUT=$x"
+                    sed -i "1s/.*/$var/" ./sent/"$x"
+                    mv ./sent/"$x" ./inp/
+                done
+                for x in $(ls sent/*Duplication*); do
+                    var="## METRICS CLASS    DuplicationMetrics    INPUT=$x"
+                    sed -i "1s/.*/$var/" ./sent/"$x"
                     mv ./sent/"$x" ./inp/
                 done
             done
