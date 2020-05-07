@@ -131,16 +131,19 @@ custom_data:
 sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
-    picard/alignment_metrics:
+    #picard/alignment_metrics:
+    sentieon/alignment_metrics:
         fn: '*.AlignmentStat_metrics.txt'
         shared: true
-    picard/insertsize:
+    #picard/insertsize:
+    sentieon/insertsize:
         fn: '*.InsertSize_metrics.txt'
         shared: true
     picard/markdups:
         fn: '*.Duplication_metrics.txt'
         shared: true
-    picard/gcbias:
+    #picard/gcbias:
+    sentieon/gcbias:
         fn: '*.GCBias_metrics.txt'
         shared: true
     picard/quality_by_cycle:
