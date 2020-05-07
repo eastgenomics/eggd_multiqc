@@ -109,21 +109,41 @@ plots_flat_numseries: 200        # If neither of the above, use flat if > this n
 num_datasets_plot_limit: 50      # If interactive, don't plot on load if > this number of datasets
 max_table_rows: 500              # Swap tables for a beeswarm plot above this
 
+# Add code to include data from custom QC reports
+custom_data:
+    vcf_qc_files:
+        file_format: 'tsv'
+        section_name: 'Het-hom analysis'
+        description: 'This plot comes from files acommpanied by a mutliqc_config.yaml file for configuration'
+        plot_type: 'table'
+        table_config:
+            id: 'example_table'
+            table_title: 'Het-hom'
+            'col1_header': 'Sample'
+            'col2_header': 'mean het ratio'
+            'col3_header': 'mean homo ratio'
+            'col4_header': 'het:homo ratio'
+            'col5_header': 'X homo:het ratio'
+            'col6_header': 'gender'
+
 # Overwrite module filename search patterns. See multiqc/utils/search_patterns.yaml
 # for the defaults. Remove a default by setting it to null.
 sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
-    picard/alignment_metrics:
+    #picard/alignment_metrics:
+    sentieon/alignment_metrics:
         fn: '*.AlignmentStat_metrics.txt'
         shared: true
-    picard/insertsize:
+    #picard/insertsize:
+    sentieon/insertsize:
         fn: '*.InsertSize_metrics.txt'
         shared: true
     picard/markdups:
         fn: '*.Duplication_metrics.txt'
         shared: true
-    picard/gcbias:
+    #picard/gcbias:
+    sentieon/gcbias:
         fn: '*.GCBias_metrics.txt'
         shared: true
     picard/quality_by_cycle:
