@@ -157,6 +157,8 @@ sp:
     samtools/flagstat:
         contents: 'in total (QC-passed reads + QC-failed reads)'
         shared: true
+    vcf_qc_files:
+        fn: '*.annotated.vcf.QC'
 
 # # Specify a custom logo to add to reports (uncomment to use)
 # custom_logo: null         # '/path/to/logo.png'

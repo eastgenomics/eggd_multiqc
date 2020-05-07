@@ -29,31 +29,7 @@ main() {
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
         elif [[ $f == sentieon*/ ]]; then
             for s in $(dx ls ${wfdir}/"$f" --folders); do
-                mkdir sent
-                dx download ${wfdir}/"$f"/"$s"/* -o ./sent/
-                cd sent
-                for x in $(ls *GCBias_*); do
-                    var="## METRICS CLASS    GcBiasMetrics    GcBiasDetailMetrics    INPUT=$x"
-                    sed -i "1s/.*/${var}/" "$x"
-                    mv ./"$x" ../inp/
-                done
-                for x in $(ls *Alignment*); do
-                    var="## METRICS CLASS    AlignmentSummaryMetrics    INPUT=$x"
-                    sed -i "1s/.*/${var}/" "$x"
-                    mv ./"$x" ../inp/
-                done
-                for x in $(ls *InsertSize*); do
-                    var="## METRICS CLASS    InsertSizeMetrics    INPUT=$x"
-                    sed -i "1s/.*/${var}/" "$x"
-                    mv ./"$x" ../inp/
-                done
-                for x in $(ls *Duplication*); do
-                    var="## METRICS CLASS    DuplicationMetrics    INPUT=$x"
-                    sed -i "1s/.*/${var}/" "$x"
-                    mv ./"$x" ../inp/
-                done
-                cd ..
-                rm -r sent
+                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
             done
         elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
@@ -65,15 +41,30 @@ main() {
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
+    # Make sure pip is up to date
+    pip install --upgrade pip
+    
+    # Download our MultiQC fork with the Sentieon module added, and install it with pip
+    git clone https://github.com/eastgenomics/MultiQC.git
+    cd MultiQC
+    pip install -e .
+    cd ..
+    
+    # Add the install location to PATH
+    export PATH=$PATH:/home/dnanexus/.local/bin
+    
     # Download the tar-zipped docker image either from input or default
-    dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
+    #dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
     # Load the tar-zipped docker image
-    docker load -i docker_image #multiqc_v1.8.tar
+    #docker load -i docker_image #multiqc_v1.8.tar
     # The docker -v flag mounts a local directory to the docker environment in the format:
     #    -v local_dir:docker_dir
     # MultiQC is run with the following parameters :
     #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
+    #docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
+
+    # Run multiQC as above but without docker
+    multiqc ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv eggd_multiqc_config_file ${outdir}/${workflow}-multiqc_data/
