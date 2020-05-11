@@ -45,13 +45,17 @@ main() {
     pip install --upgrade pip
     
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
-    git clone https://github.com/eastgenomics/MultiQC.git
+    git clone https://github.com/eastgenomics/MultiQC.git 
     cd MultiQC
+    git checkout 42b90dc  # This is the commit with the module added but not merged with 1.9Dev
     pip install -e .
     cd ..
     
     # Add the install location to PATH
     export PATH=$PATH:/home/dnanexus/.local/bin
+    
+    # Show MultiQC version (should not be the Dev version)
+    multiqc --version
     
     # Download the tar-zipped docker image either from input or default
     #dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
