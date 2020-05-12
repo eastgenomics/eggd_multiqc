@@ -112,10 +112,10 @@ custom_data:
     vcf_qc_files:
         file_format: 'tsv'
         section_name: 'Het-hom analysis'
-        description: 'This plot comes from files acommpanied by a mutliqc_config.yaml file for configuration'
+        description: 'This plot comes from vcf_qc files'
         plot_type: 'table'
         table_config:
-            id: 'example_table'
+            id: 'het-hom_table'
             table_title: 'Het-hom'
             'col1_header': 'Sample'
             'col2_header': 'mean het ratio'
@@ -157,6 +157,8 @@ sp:
         shared: true
     vcf_qc_files:
         fn: '*.annotated.vcf.QC'
+    happy:
+        fn: '*.summary.csv'
 
 # # Specify a custom logo to add to reports (uncomment to use)
 # custom_logo: null         # '/path/to/logo.png'
