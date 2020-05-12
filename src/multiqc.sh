@@ -17,32 +17,33 @@ set -e -x -o pipefail
 
 main() {
 
-    # Download the config file and qc files into 'inputs' folder
+    # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
-    # get all the QC files (stored in output/app/? folder) and put into 'inp'
+    # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
-    wfdir="$project_for_multiqc:/output/$workflow_for_multiqc"
+    wfdir="$project_for_multiqc:/output/$run_for_multiqc"
     for f in $(dx ls ${wfdir} --folders); do
-        if [[ $f == eggd_picardqc_*/ ]] || [[ $f == verifybamid_*/ ]]; then
+        if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
         elif [[ $f == sentieon*/ ]]; then
             for s in $(dx ls ${wfdir}/"$f" --folders); do
                 dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
             done
-        elif [[ $f == fastqc/ ]] || [[ $f == samtools_*/ ]] || [[ $f == region_coverage_*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+        elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
 
     # Create the output folders that will be recognised by the job upon completion
-    workflow=$(echo $workflow_for_multiqc | sed 's/003_//')
+    workflow=$(echo $run_for_multiqc)
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
+    # A modified MultiQC is installed from eastgenomics repo and run  
     # Make sure pip is up to date
-    pip install --upgrade pip
+    pip install --upgrade pip==20.1
     
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
     git clone https://github.com/eastgenomics/MultiQC.git 
@@ -50,23 +51,11 @@ main() {
     git checkout 42b90dc  # This is the commit with the module added but not merged with 1.9Dev
     pip install -e .
     cd ..
-    
     # Add the install location to PATH
     export PATH=$PATH:/home/dnanexus/.local/bin
-    
     # Show MultiQC version (should not be the Dev version)
     multiqc --version
     
-    # Download the tar-zipped docker image either from input or default
-    #dx download "$multiqc_docker_image" -o docker_image #project-Fkb6Gkj433GVVvj73J7x8KbV:file-FpQg5fj4g59gqqfK3gGkFVQg
-    # Load the tar-zipped docker image
-    #docker load -i docker_image #multiqc_v1.8.tar
-    # The docker -v flag mounts a local directory to the docker environment in the format:
-    #    -v local_dir:docker_dir
-    # MultiQC is run with the following parameters :
-    #    multiqc <dir containing files> -n <path/to/output> -c </path/to/config>
-    #docker run -v ${PWD}:${PWD} -w ${PWD} ewels/multiqc:1.8 ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
-
     # Run multiQC as above but without docker
     multiqc ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
 
@@ -77,9 +66,5 @@ main() {
 
     # Upload results
     dx-upload-all-outputs
-   
-    #html_report=$(dx upload html_report --brief)
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it does.
+
 }
