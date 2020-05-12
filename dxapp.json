@@ -16,20 +16,13 @@
       "patterns": ["*.yaml"]
     },
     {
-      "name": "multiqc_docker_image",
-      "label": "docker image",
-      "optional": false,
-      "class": "file",
-      "patterns": ["*.tar"]
-    },
-    {
       "name": "project_for_multiqc",
       "label": "project to get the MultiQC treatment",
       "help": "The project to get the MultiQC treatment",
       "class": "string"
     },
     {
-      "name": "workflow_for_multiqc",
+      "name": "run_for_multiqc",
       "label": "workflow run to get the MultiQC treatment",
       "help": "The run to get the MultiQC treatment",
       "class": "string"
@@ -55,13 +48,6 @@
         "hours": 24
       }
     },
-    "assetDepends": [{
-      "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
-      "folder": "/assets/",
-      "name": "ewels/multiqc:1.8",
-      "id": "record-FpKj9Qj433GvVgBJ2JgJv2vp",
-      "version": "0.0.1"
-      }],
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
