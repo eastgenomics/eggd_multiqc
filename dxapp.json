@@ -1,6 +1,6 @@
 {
-  "name": "multiqc_eggd",
-  "title": "eggd_multiqc",
+  "name": "MultiQC_v1.0.0",
+  "title": "MultiQC_v1.0.0",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "version": "1.0.0",
@@ -10,22 +10,22 @@
   "inputSpec": [
     {
       "name": "eggd_multiqc_config_file",
-      "label": "config file",
+      "label": "MultiQC config file",
       "optional": false,
       "class": "file",
       "patterns": ["*.yaml"]
     },
     {
       "name": "project_for_multiqc",
-      "label": "project to get the MultiQC treatment, eg '003_200430_DiasBatch'",
-      "help": "The project to get the MultiQC treatment",
+      "label": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX'",
+      "help": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX",
       "optional": false,
       "class": "string"
     },
     {
       "name": "run_for_multiqc",
-      "label": "Name with date of run to get the MultiQC treatment, eg 'dias_v1.0.0_DEV-200430-1'",
-      "help": "The run to get the MultiQC treatment",
+      "label": "Workflow output directory, eg 'dias_v1.0.0-200430-1'",
+      "help": "Name of the directory that holds the QC data, in format workflow_version-date-number, eg 'dias_v1.0.0-200430-1'",
       "optional": false,
       "class": "string"
     }
@@ -53,7 +53,7 @@
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
-    "file": "src/multiqc.sh"    
+    "file": "src/multiqc.sh"
   },
   "access": {
     "allProjects":"VIEW",
