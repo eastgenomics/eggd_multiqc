@@ -7,7 +7,7 @@ ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
 This app runs MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
 * Het-hom analysis
 * Verifybamid
-* sentieonPicard and Picard
+* sentieon-dnaseq and Picard
 * samtools/flagstat and
 * FastQC 
 
@@ -29,9 +29,6 @@ The following outputs are placed in the DNAnexus project under '/QC/multiqc':
 ## How does this app work?
 1. The app downloads all files within all the $project_for_multiQC/output/$run_for_multiQC/QCapp directory of the project. 
 2. A config file is used to search for files with specific name patterns, which are downloaded if found.
-3. A dockerised version of MultiQC is used. The docker image is stored on DNAnexus as an asset, which is bundled with the app build. The following commands were used to generate this asset in a cloud workstation:
-    * `docker pull ewels/multiqc:1.8`
-    * `dx-docker create-asset ewels/multiqc:1.8`
-    * The asset on DNAnexus was then renamed with the following command: `dx mv ewels\\multiqc\\:1.8 ewels_multiqc_1.8`
+3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is 42b90dc. The custom modules are installed using pip v20.1.
 4. MultiQC parses all files, including any recognised files in the report.
 5. The MultiQC outputs are uploaded to DNAnexus.
