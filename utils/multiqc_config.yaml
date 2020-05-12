@@ -54,11 +54,11 @@ extra_fn_clean_exts:
     - type: remove
       pattern: '.duplication'
     - type: remove
-      pattern: '.AlignmentStat_metrics'
+      pattern: '.AlignmentStat'
     - type: remove
-      pattern: '.GCBias_metrics'
+      pattern: '.GCBias'
     - type: remove
-      pattern: '.InsertSize_metrics'
+      pattern: '.InsertSize'
     - type: remove
       pattern: '.MeanQualityByCycle_metrics'
     - type: remove
