@@ -23,18 +23,21 @@ main() {
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
-    wfdir="$project_for_multiqc:/output/$run_for_multiqc"
-    for f in $(dx ls ${wfdir} --folders); do
-        if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
-            dx download ${wfdir}/"$f"/QC/* -o ./inp/
-        elif [[ $f == sentieon*/ ]]; then
-            for s in $(dx ls ${wfdir}/"$f" --folders); do
-                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
-            done
-        elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
-            dx download ${wfdir}/"$f"/* -o ./inp/
-        fi
-    done
+    # wfdir="$project_for_multiqc:/output/$run_for_multiqc"
+    # for f in $(dx ls ${wfdir} --folders); do
+    #     if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
+    #         dx download ${wfdir}/"$f"/QC/* -o ./inp/
+    #     elif [[ $f == sentieon*/ ]]; then
+    #         for s in $(dx ls ${wfdir}/"$f" --folders); do
+    #             dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+    #         done
+    #     elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+    #         dx download ${wfdir}/"$f"/* -o ./inp/
+    #     fi
+    # done
+
+    hapdir="$project_for_multiqc:/qc/vcfeval_hap.py_v1.0.1"
+    dx download ${hapdir}/* -o ./inp/
 
     # Create the output folders that will be recognised by the job upon completion
     filename="$(echo $project_for_multiqc)-$(echo $run_for_multiqc)-multiqc"

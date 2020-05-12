@@ -1,6 +1,6 @@
 {
-  "name": "MultiQC_v1.0.0",
-  "title": "MultiQC_v1.0.0",
+  "name": "MultiQC_happy",
+  "title": "MultiQC_Happy",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "version": "1.0.0",
