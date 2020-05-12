@@ -56,13 +56,13 @@ main() {
     # Show MultiQC version (should not be the Dev version)
     multiqc --version
     
-    # Run multiQC as above but without docker
-    multiqc ./inp/ -n ./${outdir}/${filename}.html -c /home/dnanexus/eggd_multiqc_config_file
+    # Run multiQC
+    multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv eggd_multiqc_config_file ${outdir}/${filename}_data/
+    mv eggd_multiqc_config_file ${outdir}/$filename_data/
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/${filename}.html ${report_outdir}
+    mv ${outdir}/$filename.html ${report_outdir}
 
     # Upload results
     dx-upload-all-outputs
