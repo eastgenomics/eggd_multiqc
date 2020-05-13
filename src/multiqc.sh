@@ -44,7 +44,7 @@ main() {
     # A modified MultiQC is installed from eastgenomics repo and run  
     # Make sure pip is up to date
     pip install --upgrade pip==20.1
-    
+
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
     git clone https://github.com/eastgenomics/MultiQC.git 
     cd MultiQC
@@ -55,7 +55,7 @@ main() {
     export PATH=$PATH:/home/dnanexus/.local/bin
     # Show MultiQC version (should not be the Dev version)
     multiqc --version
-    
+
     # Run multiQC
     multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
 
