@@ -1,10 +1,11 @@
-# eggd_multiqc (DNAnexus Platform App)
+# MultiQC (DNAnexus Platform App)
 
 multiqc
-ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
+forked from ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
+East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/)
 
 ## What does this app do?
-This app runs MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
+This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
 * Het-hom analysis
 * Verifybamid
 * sentieon-dnaseq and Picard
