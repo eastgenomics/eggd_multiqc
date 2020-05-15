@@ -21,7 +21,7 @@ main() {
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
-    # eg. 003_200415_DiasWorkflow:/output/dias_v1.0.0_DEV-200429-1/fastqc
+    # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
     mkdir inp
     wfdir="$project_for_multiqc:/output/$run_for_multiqc"
     for f in $(dx ls ${wfdir} --folders); do
@@ -37,32 +37,32 @@ main() {
     done
 
     # Create the output folders that will be recognised by the job upon completion
-    workflow=$(echo $run_for_multiqc)
+    filename="$(echo $project_for_multiqc)-$(echo $run_for_multiqc)-multiqc"
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
     # A modified MultiQC is installed from eastgenomics repo and run  
     # Make sure pip is up to date
     pip install --upgrade pip==20.1
-    
+
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
-    git clone https://github.com/eastgenomics/MultiQC.git 
+    git clone https://github.com/eastgenomics/MultiQC.git
     cd MultiQC
-    git checkout 42b90dc  # This is the commit with the module added but not merged with 1.9Dev
+    git checkout 6c66676  # This is the commit with the module added but not merged with 1.9Dev
     pip install -e .
     cd ..
     # Add the install location to PATH
     export PATH=$PATH:/home/dnanexus/.local/bin
     # Show MultiQC version (should not be the Dev version)
     multiqc --version
-    
-    # Run multiQC as above but without docker
-    multiqc ./inp/ -n ./${outdir}/${workflow}-multiqc.html -c /home/dnanexus/eggd_multiqc_config_file
+
+    # Run multiQC
+    multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv eggd_multiqc_config_file ${outdir}/${workflow}-multiqc_data/
+    mv eggd_multiqc_config_file ${outdir}/$filename_data/
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/${workflow}-multiqc.html ${report_outdir}
+    mv ${outdir}/$filename.html ${report_outdir}
 
     # Upload results
     dx-upload-all-outputs

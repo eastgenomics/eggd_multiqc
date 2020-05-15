@@ -16,7 +16,7 @@
 
 ---
 # Title to use for the report.
-title: null
+title: East GLH MultiQC Report
 
 # Prepend sample names with their directory. Useful if analysing the
 # sample samples with different parameters.
@@ -54,11 +54,11 @@ extra_fn_clean_exts:
     - type: remove
       pattern: '.duplication'
     - type: remove
-      pattern: '.AlignmentStat_metrics'
+      pattern: '.AlignmentStat'
     - type: remove
-      pattern: '.GCBias_metrics'
+      pattern: '.GCBias'
     - type: remove
-      pattern: '.InsertSize_metrics'
+      pattern: '.InsertSize'
     - type: remove
       pattern: '.MeanQualityByCycle_metrics'
     - type: remove
@@ -112,10 +112,10 @@ custom_data:
     vcf_qc_files:
         file_format: 'tsv'
         section_name: 'Het-hom analysis'
-        description: 'This plot comes from files acommpanied by a mutliqc_config.yaml file for configuration'
+        description: 'This plot comes from vcf_qc files'
         plot_type: 'table'
         table_config:
-            id: 'example_table'
+            id: 'het-hom_table'
             table_title: 'Het-hom'
             'col1_header': 'Sample'
             'col2_header': 'mean het ratio'
@@ -157,12 +157,14 @@ sp:
         shared: true
     vcf_qc_files:
         fn: '*.annotated.vcf.QC'
+    happy:
+        fn: '*.summary.csv'
 
 # # Specify a custom logo to add to reports (uncomment to use)
-# custom_logo: null         # '/path/to/logo.png'
-# custom_logo_url: null     # 'https://www.example.com'
-# custom_logo_title: null   # 'Our Institute Name'
-# subtitle: null            # Grey text below title
+# custom_logo: 'link to egglogo.png'         # '/path/to/logo.png'
+# custom_logo_url: 'https://cuhbioinformatics.atlassian.net/servicedesk/customer/portal/3'     # 'https://www.example.com'
+# custom_logo_title: 'Bioinformatics Help Desk'   # 'Our Institute Name'
+# subtitle: Click logo to raise a help desk ticket            # Grey text below title
 # intro_text: null          # Set to False to remove, or your own text
 
 # # Add generic information to the top of reports
@@ -176,9 +178,9 @@ sp:
 table_columns_visible:
     bcl2fastq:
         total: False
-    FastQC:
-        percent_fails: False
-        total_sequences: True
+    # FastQC:
+    #     percent_fails: False
+    #     total_sequences: True
     Peddy:
         family_id: False
         ancestry-prediction: False
@@ -189,11 +191,13 @@ table_columns_visible:
         sex_error: True
     verifyBAMID:
         CHIPMIX: False
+    vcf_qc_files:
+        
 
 # Set picard configs
 picard_config:
     general_stats_target_coverage:
-        - 30
+        - 20
 
 # Set conditional formatting rules for general stats FREEMIX
 table_cond_formatting_rules:
