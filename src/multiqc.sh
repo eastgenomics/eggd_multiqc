@@ -11,50 +11,60 @@
 #
 # Any code outside of main() (or any entry point you may add) is
 # ALWAYS executed, followed by running the entry point itself.
-#
-# See https://documentation.dnanexus.com/developer for tutorials on how
-# to modify this file.
+
+# Exit at any point if there is any error and output each line as it is executed (for debugging)
+set -e -x -o pipefail
 
 main() {
 
-    echo "Value of eggd_multiqc_config_file: '$eggd_multiqc_config_file'"
-
-    # The following line(s) use the dx command-line tool to download your file
-    # inputs to the local file system using variable names for the filenames. To
-    # recover the original filenames, you can use the output of "dx describe
-    # "$variable" --name".
-
+    # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
-    # Fill in your application code here.
-    #
-    # To report any recognized errors in the correct format in
-    # $HOME/job_error.json and exit this script, you can use the
-    # dx-jobutil-report-error utility as follows:
-    #
-    #   dx-jobutil-report-error "My error message"
-    #
-    # Note however that this entire bash script is executed with -e
-    # when running in the cloud, so any line which returns a nonzero
-    # exit code will prematurely exit the script; if no error was
-    # reported in the job_error.json file, then the failure reason
-    # will be AppInternalError with a generic error message.
-
-    # The following line(s) use the dx command-line tool to upload your file
-    # outputs after you have created them on the local file system.  It assumes
-    # that you have used the output field name for the filename for each output,
-    # but you can change that behavior to suit your needs.  Run "dx upload -h"
-    # to see more options to set metadata.
-
-    html_report=$(dx upload html_report --brief)
-
-    # The following line(s) use the utility dx-jobutil-add-output to format and
-    # add output variables to your job's output as appropriate for the output
-    # class.  Run "dx-jobutil-add-output -h" for more information on what it
-    # does.
-
-    dx-jobutil-add-output html_report "$html_report" --class=file
-    for i in "${!multiqc_data_files[@]}"; do
-        dx-jobutil-add-output multiqc_data_files "${multiqc_data_files[$i]}" --class=array:file
+    # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
+    # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
+    mkdir inp
+    wfdir="$project_for_multiqc:/output/$run_for_multiqc"
+    for f in $(dx ls ${wfdir} --folders); do
+        if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
+            dx download ${wfdir}/"$f"/QC/* -o ./inp/
+        elif [[ $f == sentieon*/ ]]; then
+            for s in $(dx ls ${wfdir}/"$f" --folders); do
+                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+            done
+        elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+            dx download ${wfdir}/"$f"/* -o ./inp/
+        fi
     done
+
+    # Create the output folders that will be recognised by the job upon completion
+    filename="$(echo $project_for_multiqc)-$(echo $run_for_multiqc)-multiqc"
+    outdir=out/multiqc_data_files && mkdir -p ${outdir}
+    report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
+ 
+    # A modified MultiQC is installed from eastgenomics repo and run  
+    # Make sure pip is up to date
+    pip install --upgrade pip==20.1
+
+    # Download our MultiQC fork with the Sentieon module added, and install it with pip
+    git clone https://github.com/eastgenomics/MultiQC.git
+    cd MultiQC
+    git checkout 6c66676  # This is the commit with the module added but not merged with 1.9Dev
+    pip install -e .
+    cd ..
+    # Add the install location to PATH
+    export PATH=$PATH:/home/dnanexus/.local/bin
+    # Show MultiQC version (should not be the Dev version)
+    multiqc --version
+
+    # Run multiQC
+    multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
+
+    # Move the config file to the multiqc data output folder. This was created by running multiqc
+    mv eggd_multiqc_config_file ${outdir}/$filename_data/
+    # Move the multiqc report HTML to the output directory for uploading
+    mv ${outdir}/$filename.html ${report_outdir}
+
+    # Upload results
+    dx-upload-all-outputs
+
 }

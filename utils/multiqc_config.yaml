@@ -1,0 +1,242 @@
+#######################################
+# Eggd MultiQC Configuration File
+#######################################
+
+# This file can be saved either in the MultiQC installation
+# directory, or as ~/.multiqc_config.yaml
+
+# Configuration settings are taken from the following locations, in order:
+# - Hardcoded in MultiQC (multiqc/utils/config.py)
+# - <installation_dir>/multiqc_config.yaml
+# - ~/.multiqc_config.yaml
+# - Command line options
+
+# Note that all of the values below are set to the MultiQC defaults.
+# It's recommended that you delete any that you don't need.
+
+---
+# Title to use for the report.
+title: East GLH MultiQC Report
+
+# Prepend sample names with their directory. Useful if analysing the
+# sample samples with different parameters.
+prepend_dirs: False
+
+# Default output filenames
+output_fn_name: multiqc_report.html
+data_dir_name: multiqc_data
+
+# Whether to create the parsed data directory in addition to the report
+make_data_dir: True
+
+# Cleaning options for sample names. Typically, sample names are detected
+# from an input filename. If any of these strings are found, they and any
+# text to their right will be discarded.
+# For example - file1.fq.gz_trimmed.bam_deduplicated_fastqc.zip
+# would be cleaned to 'file1'
+# Two options here - fn_clean_exts will replace the defaults,
+# extra_fn_clean_exts will append to the defaults
+extra_fn_clean_exts:
+    - type: remove
+      pattern: '_001'      
+    - type: remove
+      pattern: '.markdup'
+    - type: remove
+      pattern: '_markdup' 
+    - type: remove
+      pattern: '.realigned'
+    - type: remove
+      pattern: '_metrics'
+    - type: remove
+      pattern: '.Duplication_metrics'
+    - type: remove
+      pattern: '.Duplication'
+    - type: remove
+      pattern: '.duplication'
+    - type: remove
+      pattern: '.AlignmentStat'
+    - type: remove
+      pattern: '.GCBias'
+    - type: remove
+      pattern: '.InsertSize'
+    - type: remove
+      pattern: '.MeanQualityByCycle_metrics'
+    - type: remove
+      pattern: '.QualDistribution_metrics'
+    # - .gz
+    # - .fastq
+    # - .fq
+    # - .bam
+    # - .sam
+    # - .sra
+    # - _tophat
+    # - _star_aligned
+    # - _fastqc
+    # - type: replace
+    #   pattern: '.sorted'
+    # - type: regex
+    #   pattern: '^Sample_\d+'
+
+# Ignore these files / directories / paths when searching for logs
+# fn_ignore_files:
+#     - .DS_Store
+# fn_ignore_dirs:
+#     - annoying_dirname
+# fn_ignore_paths:
+#     - '*/path/to/*_files/'
+
+# Ignore files larger than this when searcing for logs (bytes)
+log_filesize_limit: 5000000000
+
+# MultiQC skips a couple of debug messages when searching files as the
+# log can get very verbose otherwise. Re-enable here to help debugging.
+report_readerrors: False
+report_imgskips: False
+
+# Opt-out of remotely checking that you're running the latest version
+no_version_check: False
+
+# How to plot graphs. Different templates can override these settings, but
+# the default template can use interactive plots (Javascript using HighCharts)
+# or flat plots (images, using MatPlotLib). With interactive plots, the report
+# can prevent automatically rendering all graphs if there are lots of samples
+# to prevent the browser being locked up when the report opens.
+plots_force_flat: False          # Try to use only flat image graphs
+plots_force_interactive: False   # Try to use only interactive javascript graphs
+plots_flat_numseries: 200        # If neither of the above, use flat if > this number of datasets
+num_datasets_plot_limit: 100      # If interactive, don't plot on load if > this number of datasets
+max_table_rows: 500              # Swap tables for a beeswarm plot above this
+
+# Add code to include data from custom QC reports
+custom_data:
+    vcf_qc_files:
+        file_format: 'tsv'
+        section_name: 'Het-hom analysis'
+        description: 'This plot comes from vcf_qc files'
+        plot_type: 'table'
+        table_config:
+            id: 'het-hom_table'
+            table_title: 'Het-hom'
+            'col1_header': 'Sample'
+            'col2_header': 'mean het ratio'
+            'col3_header': 'mean homo ratio'
+            'col4_header': 'het:homo ratio'
+            'col5_header': 'X homo:het ratio'
+            'col6_header': 'gender'
+
+# Overwrite module order (in report). See multiqc/utils/config_defaults.yaml for
+# the defaults.
+
+module_order:
+    - happy:
+        module_tag:
+            - DNA
+    - 'custom_content'
+    - verifybamid:
+        module_tag:
+            - DNA
+    - picard:
+        module_tag:
+            - DNA
+            - RNA
+    - sentieon:
+        module_tag:
+            - DNA
+    - samtools:
+        module_tag:
+            - DNA
+            - RNA
+    - fastqc:
+        module_tag:
+            - RNA
+            - DNA
+
+# Overwrite module filename search patterns. See multiqc/utils/search_patterns.yaml
+# for the defaults. Remove a default by setting it to null.
+sp:
+    fastqc/data:
+        fn: '*.stats-fastqc.txt'
+    #picard/alignment_metrics:
+    sentieon/alignment_metrics:
+        fn: '*.AlignmentStat_metrics.txt'
+        shared: true
+    #picard/insertsize:
+    sentieon/insertsize:
+        fn: '*.InsertSize_metrics.txt'
+        shared: true
+    picard/markdups:
+        fn: '*.Duplication_metrics.txt'
+        shared: true
+    #picard/gcbias:
+    sentieon/gcbias:
+        fn: '*.GCBias_metrics.txt'
+        shared: true
+    picard/quality_by_cycle:
+        fn: '*.MeanQualityByCycle_metrics.txt'
+        shared: true
+    picard/quality_score_distribution:
+        fn: '*.QualDistribution_metrics.txt'
+        shared: true
+    verifybamid/selfsm:
+        fn: '*.selfSM'
+    samtools/flagstat:
+        contents: 'in total (QC-passed reads + QC-failed reads)'
+        shared: true
+    vcf_qc_files:
+        fn: '*.annotated.vcf.QC'
+    happy:
+        fn: '*.summary.csv'
+
+# # Specify a custom logo to add to reports (uncomment to use)
+# custom_logo: 'link to egglogo.png'         # '/path/to/logo.png'
+# custom_logo_url: 'https://cuhbioinformatics.atlassian.net/servicedesk/customer/portal/3'     # 'https://www.example.com'
+# custom_logo_title: 'Bioinformatics Help Desk'   # 'Our Institute Name'
+# subtitle: Click logo to raise a help desk ticket            # Grey text below title
+# intro_text: null          # Set to False to remove, or your own text
+
+# # Add generic information to the top of reports
+# report_header_info:
+#     - Example Config:: 'This is arbitrary'
+#     - Another field:: 'Loaded from <code>multiqc_config_example.yaml</code>'
+#     - Something different:: 'You can put any key-value pairs here'
+#     - Want to know more?: 'See the <a href="http://multiqc.info/docs" target="_blank">MultiQC docs</a>'
+
+# Overwrite the defaults of which table columns are visible by default
+table_columns_visible:
+    bcl2fastq:
+        total: False
+    FastQC: False
+    #     percent_fails: False
+    #     total_sequences: True
+    Peddy:
+        family_id: False
+        ancestry-prediction: False
+        ancestry-prob_het_check: False
+        predicted_sex_sex_check: False
+        predicted_sex_sex_check: False    
+        sex_het_ratio: True
+        sex_error: True
+    verifyBAMID:
+        CHIPMIX: False
+        
+
+# Set picard configs
+picard_config:
+    general_stats_target_coverage:
+        - 20
+
+# Set conditional formatting rules for general stats FREEMIX
+table_cond_formatting_rules:
+    mqc-generalstats-verifybamid-FREEMIX:
+        fail:
+            - gt: 2
+            - eq: 2
+        pass:
+            - lt: 2
+
+# Remove plots from HTML report
+remove_sections:
+    # For peddy, keep only the sex-check plot
+    - peddy-pca-plot
+    - peddy-relatedness-plot
+    - peddy-hetcheck-plot
