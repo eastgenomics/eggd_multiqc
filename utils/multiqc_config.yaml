@@ -16,7 +16,7 @@
 
 ---
 # Title to use for the report.
-title: null
+title: East GLH MultiQC Report
 
 # Prepend sample names with their directory. Useful if analysing the
 # sample samples with different parameters.
@@ -161,10 +161,10 @@ sp:
         fn: '*.summary.csv'
 
 # # Specify a custom logo to add to reports (uncomment to use)
-# custom_logo: null         # '/path/to/logo.png'
-# custom_logo_url: null     # 'https://www.example.com'
-# custom_logo_title: null   # 'Our Institute Name'
-# subtitle: null            # Grey text below title
+# custom_logo: 'link to egglogo.png'         # '/path/to/logo.png'
+# custom_logo_url: 'https://cuhbioinformatics.atlassian.net/servicedesk/customer/portal/3'     # 'https://www.example.com'
+# custom_logo_title: 'Bioinformatics Help Desk'   # 'Our Institute Name'
+# subtitle: Click logo to raise a help desk ticket            # Grey text below title
 # intro_text: null          # Set to False to remove, or your own text
 
 # # Add generic information to the top of reports
@@ -178,9 +178,9 @@ sp:
 table_columns_visible:
     bcl2fastq:
         total: False
-    FastQC:
-        percent_fails: False
-        total_sequences: True
+    # FastQC:
+    #     percent_fails: False
+    #     total_sequences: True
     Peddy:
         family_id: False
         ancestry-prediction: False
@@ -191,6 +191,8 @@ table_columns_visible:
         sex_error: True
     verifyBAMID:
         CHIPMIX: False
+    vcf_qc_files:
+        
 
 # Set picard configs
 picard_config:
