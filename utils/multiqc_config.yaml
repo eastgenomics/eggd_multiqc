@@ -124,6 +124,33 @@ custom_data:
             'col5_header': 'X homo:het ratio'
             'col6_header': 'gender'
 
+# Overwrite module order (in report). See multiqc/utils/config_defaults.yaml for
+# the defaults.
+
+module_order:
+    - happy:
+        module_tag:
+            - DNA
+    - 'custom_content'
+    - verifybamid:
+        module_tag:
+            - DNA
+    - picard:
+        module_tag:
+            - DNA
+            - RNA
+    - sentieon:
+        module_tag:
+            - DNA
+    - samtools:
+        module_tag:
+            - DNA
+            - RNA
+    - fastqc:
+        module_tag:
+            - RNA
+            - DNA
+
 # Overwrite module filename search patterns. See multiqc/utils/search_patterns.yaml
 # for the defaults. Remove a default by setting it to null.
 sp:
@@ -178,7 +205,7 @@ sp:
 table_columns_visible:
     bcl2fastq:
         total: False
-    # FastQC:
+    FastQC: False
     #     percent_fails: False
     #     total_sequences: True
     Peddy:
@@ -191,7 +218,6 @@ table_columns_visible:
         sex_error: True
     verifyBAMID:
         CHIPMIX: False
-    vcf_qc_files:
         
 
 # Set picard configs
