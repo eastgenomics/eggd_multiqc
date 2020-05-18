@@ -6,6 +6,7 @@ East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/)
 
 ## What does this app do?
 This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
+* VCFeval Hap.py
 * Het-hom analysis
 * Verifybamid
 * sentieon-dnaseq and Picard
@@ -18,8 +19,9 @@ To visualise QC reports, this app should be run at the end of an NGS pipeline, w
 ## What data are required for this app to run?
 * project_for_multiQC - The name of the project to be assessed. (like 002_200430_DiasBatch)
   * This project must have an 'output' folder in its root directory.
-* run_for_multiQC - The exact name of a run. (like dias_v1.0.0-200430-1) 
+* single_sample_workflow_for_multiQC - The exact name of a ss run. (like dias_v1.0.0-200430-1) 
   * This folder must have subfolders for each QC app. (like run/verifybamid or run/fastqc)
+* multi_sample_workflow_for_multiQC - The exact name of a ms run. (like multi_v1.0.0-200430-1) 
 * config_file.yaml - A config file specifying which modules to run and the search pattern to recognise qc files for each module
 
 ## What does this app output?
