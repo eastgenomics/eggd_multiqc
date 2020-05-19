@@ -9,8 +9,8 @@ This app runs the East GLH fork of MultiQC to generate run wide quality control 
 * VCFeval Hap.py
 * Het-hom analysis
 * Verifybamid
-* sentieon-dnaseq and Picard
-* samtools/flagstat and
+* Sentieon-dnaseq and Picard
+* Samtools/flagstat and
 * FastQC 
 
 ## What are the typical use cases for this app?
@@ -25,13 +25,13 @@ To visualise QC reports, this app should be run at the end of an NGS pipeline, w
 * config_file.yaml - A config file specifying which modules to run and the search pattern to recognise qc files for each module
 
 ## What does this app output?
-The following outputs are placed in the DNAnexus project under '/QC/multiqc':
+The following outputs are placed in the DNAnexus project:
 * A HTML QC report (with the name of the runfolder)
 * A folder containing the output in text format. (folder named after run-multiqc_data)
 
 ## How does this app work?
 1. The app downloads all files within all the $project_for_multiQC/output/$run_for_multiQC/QCapp directory of the project. 
 2. A config file is used to search for files with specific name patterns, which are downloaded if found.
-3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is 42b90dc. The custom modules are installed using pip v20.1.
-4. MultiQC parses all files, including any recognised files in the report.
+3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is 6c66676. The custom modules are installed using pip v20.1.
+4. MultiQC parses all recognised files and includes them in the report.
 5. The MultiQC outputs are uploaded to DNAnexus.
