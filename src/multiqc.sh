@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.0.2
+# multiqc 1.0.3
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -11,15 +11,19 @@ main() {
 
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
-    mkdir inp
     wfdir="$project_for_multiqc:/output/$ss_for_multiqc"
+    mkdir inp
+    mkdir happy
+    # Download happy reports into happy folder
     for h in $(dx ls ${wfdir}/"$ms_for_multiqc" --folders); do
         if [[ $h == *vcfeval*/ ]]; then
-            dx download ${wfdir}/"$ms_for_multiqc"/"$h"/* -o ./inp/
+            dx download ${wfdir}/"$ms_for_multiqc"/"$h"/* -o ./happy/
         fi
     done
     
+    # Download all other reports from the single_sample workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
+        # echo "Searching for reports"
         if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
         elif [[ $f == sentieon*/ ]]; then
@@ -30,6 +34,28 @@ main() {
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
+
+    # Split happy output summary.csv into snp.csv and indel.csv
+    if find './happy/' -type f -name *summary.csv; then
+        INPUT=$(find './happy/' -type f -name *summary.csv)
+        OLDIFS=$IFS
+        IFS=','
+        touch inp/snp.csv
+        touch inp/indel.csv
+        [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
+        while read -r type filter a b c d e f g recall precision rest
+        do
+                if [ "$type" == "INDEL" ]; then
+                echo "${type}_${filter},${recall},${precision}" >> inp/indel.csv
+                elif [ "$type" == "SNP" ]; then
+                echo "${type}_${filter},${recall},${precision}" >> inp/snp.csv
+                else
+                echo "${type}_${filter},${recall},${precision}" >> inp/indel.csv
+                echo "${type}_${filter},${recall},${precision}" >> inp/snp.csv
+                fi
+        done < $INPUT
+        echo "Happy output successfully split"
+    fi
 
     # Create the output folders that will be recognised by the job upon completion
     filename="$(echo $project_for_multiqc)-$(echo $ss_for_multiqc)-multiqc"
