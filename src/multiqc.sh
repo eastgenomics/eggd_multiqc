@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.0.2
+# multiqc 1.0.3
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -9,17 +9,44 @@ main() {
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
+    # xargs strips leading/trailing whitespace from input strings submitted by the user
+    project=$(echo $project_for_multiqc | xargs) # project name
+    ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow
+    ms=$(echo $ms_for_multiqc | xargs)           # multi sample workflow
+
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
-    mkdir inp
-    wfdir="$project_for_multiqc:/output/$ss_for_multiqc"
-    for h in $(dx ls ${wfdir}/"$ms_for_multiqc" --folders); do
+    wfdir="$project:/output/$ss"
+    mkdir inp   # stores files to be used as input for MultiQC
+    mkdir happy
+    # Download happy reports into happy folder
+    for h in $(dx ls ${wfdir}/"$ms" --folders); do
         if [[ $h == *vcfeval*/ ]]; then
-            dx download ${wfdir}/"$ms_for_multiqc"/"$h"/* -o ./inp/
+            dx download ${wfdir}/"$ms"/"$h"/* -o ./happy/
         fi
     done
+
+    # Split happy output sample.summary.csv into sample.snp.csv and sample.indel.csv
+    find ./happy/ -type f -name "*summary.csv" -print0 |
+        while IFS= read -r -d '' line; do
+            sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
+            IFS=','
+            while read -r type filter rest; do
+                if [ "$type" == "INDEL" ]; then
+                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.indel.csv
+                elif [ "$type" == "SNP" ]; then
+                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.snp.csv
+                else # header: has to be saved once for each file
+                printf "Sample,${rest}\n" >> inp/${sampleID}.indel.csv
+                printf "Sample,${rest}\n" >> inp/${sampleID}.snp.csv
+                fi
+            done < $line
+        done
+    echo 'Happy output successfully split'
     
+    # Download all other reports from the single_sample workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
+        # echo "Searching for reports"
         if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
         elif [[ $f == sentieon*/ ]]; then
@@ -32,7 +59,7 @@ main() {
     done
 
     # Create the output folders that will be recognised by the job upon completion
-    filename="$(echo $project_for_multiqc)-$(echo $ss_for_multiqc)-multiqc"
+    filename="$(echo $project)-$(echo $ss)-multiqc"
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
