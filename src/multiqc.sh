@@ -9,9 +9,9 @@ main() {
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
-    project=$(echo $project_for_multiqc | xargs)
-    ss=$(echo $ss_for_multiqc | xargs)
-    ms=$(echo $ms_for_multiqc | xargs)
+    project=$(echo $project_for_multiqc | xargs) # project name
+    ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow
+    ms=$(echo $ms_for_multiqc | xargs)           # multi sample workflow
 
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
