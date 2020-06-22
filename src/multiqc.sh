@@ -9,6 +9,7 @@ main() {
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
+    # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow
     ms=$(echo $ms_for_multiqc | xargs)           # multi sample workflow
@@ -30,16 +31,14 @@ main() {
         while IFS= read -r -d '' line; do
             sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
             IFS=','
-            touch ${sampleID}.snp.csv
-            touch ${sampleID}.indel.csv
-            while read -r type filter a b c d k f g recall precision fraction F1 rest; do
+            while read -r type filter rest; do
                 if [ "$type" == "INDEL" ]; then
-                printf "${sampleID}_${type}_${filter},${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.indel.csv
+                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.indel.csv
                 elif [ "$type" == "SNP" ]; then
-                printf "${sampleID}_${type}_${filter},${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.snp.csv
-                else # header
-                printf "Sample,${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.indel.csv
-                printf "Sample,${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.snp.csv
+                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.snp.csv
+                else # header: has to be saved once for each file
+                printf "Sample,${rest}\n" >> inp/${sampleID}.indel.csv
+                printf "Sample,${rest}\n" >> inp/${sampleID}.snp.csv
                 fi
             done < $line
         done
