@@ -9,15 +9,19 @@ main() {
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
+    project=$(echo $project_for_multiqc | xargs)
+    ss=$(echo $ss_for_multiqc | xargs)
+    ms=$(echo $ms_for_multiqc | xargs)
+
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
-    wfdir="$project_for_multiqc:/output/$ss_for_multiqc"
+    wfdir="$project:/output/$ss"
     mkdir inp
     mkdir happy
     # Download happy reports into happy folder
-    for h in $(dx ls ${wfdir}/"$ms_for_multiqc" --folders); do
+    for h in $(dx ls ${wfdir}/"$ms" --folders); do
         if [[ $h == *vcfeval*/ ]]; then
-            dx download ${wfdir}/"$ms_for_multiqc"/"$h"/* -o ./happy/
+            dx download ${wfdir}/"$ms"/"$h"/* -o ./happy/
         fi
     done
 
@@ -58,7 +62,7 @@ main() {
     done
 
     # Create the output folders that will be recognised by the job upon completion
-    filename="$(echo $project_for_multiqc)-$(echo $ss_for_multiqc)-multiqc"
+    filename="$(echo $project)-$(echo $ss)-multiqc"
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
  
