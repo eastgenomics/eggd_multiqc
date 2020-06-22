@@ -16,7 +16,7 @@ main() {
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
     wfdir="$project:/output/$ss"
-    mkdir inp
+    mkdir inp   # stores files to be used as input for MultiQC
     mkdir happy
     # Download happy reports into happy folder
     for h in $(dx ls ${wfdir}/"$ms" --folders); do
@@ -28,9 +28,7 @@ main() {
     # Split happy output sample.summary.csv into sample.snp.csv and sample.indel.csv
     find ./happy/ -type f -name "*summary.csv" -print0 |
         while IFS= read -r -d '' line; do
-            echo $line
             sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
-            echo $sampleID
             IFS=','
             touch ${sampleID}.snp.csv
             touch ${sampleID}.indel.csv
