@@ -20,6 +20,28 @@ main() {
             dx download ${wfdir}/"$ms_for_multiqc"/"$h"/* -o ./happy/
         fi
     done
+
+    # Split happy output sample.summary.csv into sample.snp.csv and sample.indel.csv
+    find ./happy/ -type f -name "*summary.csv" -print0 |
+        while IFS= read -r -d '' line; do
+            echo $line
+            sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
+            echo $sampleID
+            IFS=','
+            touch ${sampleID}.snp.csv
+            touch ${sampleID}.indel.csv
+            while read -r type filter a b c d k f g recall precision fraction F1 rest; do
+                if [ "$type" == "INDEL" ]; then
+                printf "${sampleID}_${type}_${filter},${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.indel.csv
+                elif [ "$type" == "SNP" ]; then
+                printf "${sampleID}_${type}_${filter},${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.snp.csv
+                else # header
+                printf "Sample,${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.indel.csv
+                printf "Sample,${recall},${precision},${fraction},${F1}\n" >> inp/${sampleID}.snp.csv
+                fi
+            done < $line
+        done
+    echo 'Happy output successfully split'
     
     # Download all other reports from the single_sample workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
@@ -34,28 +56,6 @@ main() {
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
-
-    # Split happy output summary.csv into snp.csv and indel.csv
-    if find './happy/' -type f -name *summary.csv; then
-        INPUT=$(find './happy/' -type f -name *summary.csv)
-        OLDIFS=$IFS
-        IFS=','
-        touch inp/snp.csv
-        touch inp/indel.csv
-        [ ! -f $INPUT ] && { echo "$INPUT file not found"; exit 99; }
-        while read -r type filter a b c d e f g recall precision rest
-        do
-                if [ "$type" == "INDEL" ]; then
-                echo "${type}_${filter},${recall},${precision}" >> inp/indel.csv
-                elif [ "$type" == "SNP" ]; then
-                echo "${type}_${filter},${recall},${precision}" >> inp/snp.csv
-                else
-                echo "${type}_${filter},${recall},${precision}" >> inp/indel.csv
-                echo "${type}_${filter},${recall},${precision}" >> inp/snp.csv
-                fi
-        done < $INPUT
-        echo "Happy output successfully split"
-    fi
 
     # Create the output folders that will be recognised by the job upon completion
     filename="$(echo $project_for_multiqc)-$(echo $ss_for_multiqc)-multiqc"

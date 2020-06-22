@@ -35,3 +35,5 @@ The following outputs are placed in the DNAnexus project:
 3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is 6c66676. The custom modules are installed using pip v20.1.
 4. MultiQC parses all recognised files and includes them in the report.
 5. The MultiQC outputs are uploaded to DNAnexus.
+
+## This app was made by EMEE GLH
