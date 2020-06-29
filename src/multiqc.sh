@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.0.3
+# multiqc Happy
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -17,7 +17,7 @@ main() {
     # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
     wfdir="$project:/output/$ss"
-    mkdir inp   # stores files to be used as input for MultiQC
+    # mkdir inp   # stores files to be used as input for MultiQC
     mkdir happy
     # Download happy reports into happy folder
     for h in $(dx ls ${wfdir}/"$ms" --folders); do
@@ -25,38 +25,20 @@ main() {
             dx download ${wfdir}/"$ms"/"$h"/* -o ./happy/
         fi
     done
-
-    # Split happy output sample.summary.csv into sample.snp.csv and sample.indel.csv
-    find ./happy/ -type f -name "*summary.csv" -print0 |
-        while IFS= read -r -d '' line; do
-            sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
-            IFS=','
-            while read -r type filter rest; do
-                if [ "$type" == "INDEL" ]; then
-                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.indel.csv
-                elif [ "$type" == "SNP" ]; then
-                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.snp.csv
-                else # header: has to be saved once for each file
-                printf "Sample,${rest}\n" >> inp/${sampleID}.indel.csv
-                printf "Sample,${rest}\n" >> inp/${sampleID}.snp.csv
-                fi
-            done < $line
-        done
-    echo 'Happy output successfully split'
     
-    # Download all other reports from the single_sample workflow output folders
-    for f in $(dx ls ${wfdir} --folders); do
-        # echo "Searching for reports"
-        if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
-            dx download ${wfdir}/"$f"/QC/* -o ./inp/
-        elif [[ $f == sentieon*/ ]]; then
-            for s in $(dx ls ${wfdir}/"$f" --folders); do
-                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
-            done
-        elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
-            dx download ${wfdir}/"$f"/* -o ./inp/
-        fi
-    done
+    # # Download all other reports from the single_sample workflow output folders
+    # for f in $(dx ls ${wfdir} --folders); do
+    #     # echo "Searching for reports"
+    #     if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
+    #         dx download ${wfdir}/"$f"/QC/* -o ./inp/
+    #     elif [[ $f == sentieon*/ ]]; then
+    #         for s in $(dx ls ${wfdir}/"$f" --folders); do
+    #             dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+    #         done
+    #     elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+    #         dx download ${wfdir}/"$f"/* -o ./inp/
+    #     fi
+    # done
 
     # Create the output folders that will be recognised by the job upon completion
     filename="$(echo $project)-$(echo $ss)-multiqc"
@@ -68,9 +50,9 @@ main() {
     pip install --upgrade pip==20.1
 
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
-    git clone https://github.com/eastgenomics/MultiQC.git
+    git clone https://github.com/sophie22/MultiQC.git
     cd MultiQC
-    git checkout 6c66676  # This is the commit with the module added but not merged with 1.9Dev
+    git checkout f49f8c9  # This is the commit with modified Happy module
     pip install -e .
     cd ..
     # Add the install location to PATH
@@ -79,7 +61,7 @@ main() {
     multiqc --version
 
     # Run multiQC
-    multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
+    multiqc ./happy/ -m happy -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv eggd_multiqc_config_file ${outdir}/$filename_data/
