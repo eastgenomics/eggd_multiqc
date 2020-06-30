@@ -6,7 +6,7 @@ East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/)
 
 ## What does this app do?
 This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
-* VCFeval Hap.py
+* VCFeval Hap.py - SNP and INDEL values are split into separate tables
 * Het-hom analysis
 * Verifybamid
 * Sentieon-dnaseq and Picard
@@ -32,7 +32,7 @@ The following outputs are placed in the DNAnexus project:
 ## How does this app work?
 1. The app downloads all files within all the $project_for_multiQC/output/$run_for_multiQC/QCapp directory of the project. 
 2. A config file is used to search for files with specific name patterns, which are downloaded if found.
-3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is 6c66676. The custom modules are installed using pip v20.1.
+3. The app uses a modified version of MultiQC v1.8. This differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name). The forked repo is held at github.com/eastgenomics/MultiQC and the commit used is dec2e93. The custom modules are installed using pip v20.1.
 4. MultiQC parses all recognised files and includes them in the report.
 5. The MultiQC outputs are uploaded to DNAnexus.
 

@@ -1,13 +1,32 @@
 #!/bin/bash
-# multiqc 1.0.3
+# multiqc 1.0.4
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
 main() {
-
+    apt-get -y install python3-venv
+    python3 -m venv ploop
+    source ploop/bin/activate
+    
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+ 
+    # A modified MultiQC is installed from eastgenomics repo and run  
+    # Make sure pip is up to date
+    pip install --upgrade pip==20.1
+    pip install --ignore-installed PyYAML
+    python --version
+    # Download our MultiQC fork with the Sentieon module added, and install it with pip
+    git clone https://github.com/eastgenomics/MultiQC.git
+    cd MultiQC
+    git checkout dec2e93  # This is the commit with the module added but not merged with 1.9Dev
+    python3 -m pip install -e .
+    cd ..
+    # Add the install location to PATH
+    export PATH=$PATH:/home/dnanexus/.local/bin
+    # Show MultiQC version (should not be the Dev version)
+    multiqc --version
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
@@ -18,31 +37,12 @@ main() {
     # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
     wfdir="$project:/output/$ss"
     mkdir inp   # stores files to be used as input for MultiQC
-    mkdir happy
-    # Download happy reports into happy folder
+    # Download happy reports into input folder
     for h in $(dx ls ${wfdir}/"$ms" --folders); do
         if [[ $h == *vcfeval*/ ]]; then
-            dx download ${wfdir}/"$ms"/"$h"/* -o ./happy/
+            dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
         fi
     done
-
-    # Split happy output sample.summary.csv into sample.snp.csv and sample.indel.csv
-    find ./happy/ -type f -name "*summary.csv" -print0 |
-        while IFS= read -r -d '' line; do
-            sampleID=$(echo $line | awk -F "/" '{print $NF}' | awk -F "." '{print $1}')
-            IFS=','
-            while read -r type filter rest; do
-                if [ "$type" == "INDEL" ]; then
-                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.indel.csv
-                elif [ "$type" == "SNP" ]; then
-                printf "${sampleID}_${type}_${filter},${rest}\n" >> inp/${sampleID}.snp.csv
-                else # header: has to be saved once for each file
-                printf "Sample,${rest}\n" >> inp/${sampleID}.indel.csv
-                printf "Sample,${rest}\n" >> inp/${sampleID}.snp.csv
-                fi
-            done < $line
-        done
-    echo 'Happy output successfully split'
     
     # Download all other reports from the single_sample workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
@@ -62,21 +62,6 @@ main() {
     filename="$(echo $project)-$(echo $ss)-multiqc"
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
- 
-    # A modified MultiQC is installed from eastgenomics repo and run  
-    # Make sure pip is up to date
-    pip install --upgrade pip==20.1
-
-    # Download our MultiQC fork with the Sentieon module added, and install it with pip
-    git clone https://github.com/eastgenomics/MultiQC.git
-    cd MultiQC
-    git checkout 6c66676  # This is the commit with the module added but not merged with 1.9Dev
-    pip install -e .
-    cd ..
-    # Add the install location to PATH
-    export PATH=$PATH:/home/dnanexus/.local/bin
-    # Show MultiQC version (should not be the Dev version)
-    multiqc --version
 
     # Run multiQC
     multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file

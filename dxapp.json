@@ -1,6 +1,6 @@
 {
-  "name": "MultiQC_v1.0.3",
-  "title": "MultiQC_v1.0.3",
+  "name": "MultiQC_v3.5",
+  "title": "MultiQC_v3.5",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
@@ -56,6 +56,7 @@
         "hours": 24
       }
     },
+    "version": "1",
     "interpreter": "bash",
     "release": "16.04",
     "distribution": "Ubuntu",
