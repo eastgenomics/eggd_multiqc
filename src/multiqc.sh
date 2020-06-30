@@ -20,7 +20,7 @@ main() {
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
     git clone https://github.com/eastgenomics/MultiQC.git
     cd MultiQC
-    git checkout dec2e93  # This is the commit with the module added but not merged with 1.9Dev
+    git checkout a90b00b # This is the commit with the module added but not merged with 1.9Dev
     python3 -m pip install -e .
     cd ..
     # Add the install location to PATH
