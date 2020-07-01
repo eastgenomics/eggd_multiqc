@@ -5,28 +5,9 @@
 set -e -x -o pipefail
 
 main() {
-    apt-get -y install python3-venv
-    python3 -m venv ploop
-    source ploop/bin/activate
-    
+   
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
- 
-    # A modified MultiQC is installed from eastgenomics repo and run  
-    # Make sure pip is up to date
-    pip install --upgrade pip==20.1
-    pip install --ignore-installed PyYAML
-    python --version
-    # Download our MultiQC fork with the Sentieon module added, and install it with pip
-    git clone https://github.com/eastgenomics/MultiQC.git
-    cd MultiQC
-    git checkout a90b00b # This is the commit with the module added but not merged with 1.9Dev
-    python3 -m pip install -e .
-    cd ..
-    # Add the install location to PATH
-    export PATH=$PATH:/home/dnanexus/.local/bin
-    # Show MultiQC version (should not be the Dev version)
-    multiqc --version
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
@@ -62,6 +43,22 @@ main() {
     filename="$(echo $project)-$(echo $ss)-multiqc"
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
+ 
+    # A modified MultiQC is installed from eastgenomics repo and run  
+    # Make sure pip is up to date
+    pip3 install --upgrade pip==20.1
+    pip3 install --ignore-installed PyYAML
+
+    # Download our MultiQC fork with the Sentieon module added, and install it with pip
+    git clone https://github.com/eastgenomics/MultiQC.git
+    cd MultiQC
+    git checkout 84775b5 # This is the commit with the module added but not merged with 1.9Dev
+    python3 -m pip install -e .
+    cd ..
+    # Add the install location to PATH
+    export PATH=$PATH:/home/dnanexus/.local/bin
+    # Show MultiQC version (should not be the Dev version)
+    multiqc --version
 
     # Run multiQC
     multiqc ./inp/ -n ./${outdir}/$filename.html -c /home/dnanexus/eggd_multiqc_config_file

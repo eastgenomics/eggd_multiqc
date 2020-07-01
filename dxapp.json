@@ -1,10 +1,10 @@
 {
-  "name": "MultiQC_v3.6",
-  "title": "MultiQC_v3.6",
+  "name": "MultiQC_v1.0.4",
+  "title": "MultiQC_v1.0.4",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
-    "github release": "v1.0.3"
+    "github release": "v1.0.4"
   },
   "inputSpec": [
     {
