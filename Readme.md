@@ -1,12 +1,12 @@
 # MultiQC (DNAnexus Platform App)
 
 multiqc
-forked from ewels/MultiQC [v1.8](https://github.com/ewels/MultiQC/)
-East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/)
+forked from ewels/MultiQC [v1.9](https://github.com/ewels/MultiQC/)
+East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/tree/eggd_multiqc) eggd_multiqc branch
 
 ## What does this app do?
 This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
-* VCFeval Hap.py - SNP and INDEL values are split into separate tables
+* VCFeval Hap.py - INDEL and SNP values are split into separate tables
 * Het-hom analysis
 * Verifybamid
 * Sentieon-dnaseq and Picard
