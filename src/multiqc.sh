@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.0.4
+# multiqc 1.0.5
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -28,13 +28,13 @@ main() {
     # Download all other reports from the single_sample workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
         # echo "Searching for reports"
-        if [[ $f == *picardqc*/ ]] || [[ $f == verifybamid*/ ]]; then
+        if [[ $f == *picardqc*/ ]] || [[ $f == *verifybamid*/ ]]; then
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
-        elif [[ $f == sentieon*/ ]]; then
+        elif [[ $f == *sentieon*/ ]]; then
             for s in $(dx ls ${wfdir}/"$f" --folders); do
                 dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
             done
-        elif [[ $f == fastqc/ ]] || [[ $f == samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+        elif [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
             dx download ${wfdir}/"$f"/* -o ./inp/
         fi
     done
