@@ -4,7 +4,7 @@
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
-    "github release": "v1.0.5"
+    "githubRelease": "v1.0.5"
   },
   "inputSpec": [
     {
