@@ -47,7 +47,8 @@ main() {
     # A modified MultiQC is installed from eastgenomics repo and run  
     # Make sure pip is up to date
     pip3 install --upgrade pip==20.1
-    pip3 install --ignore-installed PyYAML
+    pip3 install --ignore-installed 'PyYAML==5.3.1'
+    pip3 install -r /requirements.txt
 
     # Download our MultiQC fork with the Sentieon module added, and install it with pip
     git clone https://github.com/eastgenomics/MultiQC.git
