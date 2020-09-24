@@ -8,14 +8,17 @@ main() {
 
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+
+    # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
+    
+    # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
 
     if [[ ! -z ${ms_for_multiqc} ]]; then
         echo "Has single and multi_sample workflow provided"
 
-        # xargs strips leading/trailing whitespace from input strings submitted by the user
         ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
 
         # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'

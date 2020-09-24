@@ -39,9 +39,9 @@ The following outputs are placed in the DNAnexus project in the specified output
 * a folder containing the outputs in text format. (folder named after project-multiqc_data)
 
 ## How does this app work?
-1. A config file is used to search for files with specific name patterns, which are downloaded if found.
-2. The app downloads all files within all the $project_for_multiQC/output/$ss_for_multiQC/QCapp directory of the project.
-3. The app uses a modified version of MultiQC v1.9. This version differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name) and the happy module that shows SNP and indel values in separate tables to allow for different thresholds to be set. The forked repo with all dependecies have been dockerised and a tarball of the docker image is in the /resources directory of the app.
+1. Searches for files with specific name patterns (defined in the config file), which are downloaded if found.
+2. The app downloads all files within all the $project_for_multiQC/output/$ss_for_multiQC/QCapp directories of the project.
+3. The app uses a modified version of MultiQC v1.9. This version differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name) and the happy module that shows SNP and indel precision/recall values in separate tables to allow for different thresholds to be set. The forked repo with all dependecies have been dockerised and a tarball of the docker image is in the /resources directory of the app.
 4. MultiQC parses all recognised files and includes them in the report.
 5. The MultiQC outputs are uploaded to DNAnexus.
 
