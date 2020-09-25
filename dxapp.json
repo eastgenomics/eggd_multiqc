@@ -1,10 +1,10 @@
 {
-  "name": "MultiQC_v1.0.6",
-  "title": "MultiQC_v1.0.6",
+  "name": "MultiQC_v1.1.0",
+  "title": "MultiQC_v1.1.0",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
-    "githubRelease": "v1.0.6"
+    "githubRelease": "v1.1.0"
   },
   "inputSpec": [
     {
@@ -32,7 +32,7 @@
       "name": "ms_for_multiqc",
       "label": "Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
       "help": "Name of the directory that holds the multi sample workflow output data, in format ms_workflow_version-date-number, eg 'multi_v1.0.0-200430-1'",
-      "optional": false,
+      "optional": true,
       "class": "string"
     }
   ],
