@@ -12,7 +12,7 @@ main() {
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
-    
+
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
 
