@@ -73,7 +73,7 @@ main() {
 
     # Add code that runs the Python script with the coverage value and returns the output file into inp/
     pip install pandas  # should control which version of pandas is used
-    python3 calc_custom_coverage.py calc_cov coverage
+    python3 calc_custom_coverage.py calc_cov $coverage
     ls inp
 
     # Rename inp folder to a more meaningful one for downstream processing
