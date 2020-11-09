@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.1.0
+# multiqc 1.1.1
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -49,6 +49,10 @@ main() {
         dx download $project:/$ss/* -o ./inp/
         ss=${ss//\//-}
     fi
+
+    #Download stats.json either from the project folder directly or from the run1 folder
+    test -f "$project:/Stats.json" && dx download "$project:/Stats.json" -o ./inp/
+    test -f "$project:/run1/Stats.json" && dx download "$project:/run1/Stats.json" -o ./inp/
 
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
