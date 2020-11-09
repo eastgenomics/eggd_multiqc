@@ -12,9 +12,11 @@ main() {
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
+    coverage=$(echo $custom_coverage)            # target bases coverage value (int)
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
+    mkdir cov_calc  #stores HSmetrics.tsv files to calculate custom coverage
 
     if [[ ! -z ${ms_for_multiqc} ]]; then
         echo "Has single and multi_sample workflow provided"
@@ -36,6 +38,8 @@ main() {
             # echo "Searching for reports"
             if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
                 dx download ${wfdir}/"$f"/QC/* -o ./inp/
+                # Download HSmetrics.tsv files into separate folder for custom coverage calculation
+                dx download ${wfdir}/"$f"/QC/"*hsmetrics.tsv" -o ./cov_calc/
             elif [[ $f == *sentieon*/ ]]; then
                 for s in $(dx ls ${wfdir}/"$f" --folders); do
                     dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
@@ -51,8 +55,9 @@ main() {
     fi
 
     #Download stats.json either from the project folder directly or from the run1 folder
-    test -f "$project:/Stats.json" && dx download "$project:/Stats.json" -o ./inp/
-    test -f "$project:/run1/Stats.json" && dx download "$project:/run1/Stats.json" -o ./inp/
+    [ -f "$project:/Stats.json" ] && dx download "$project:/Stats.json" -o ./inp/
+    [[ -f "$project:/run1/Stats.json" ]] && dx download "$project:/run1/Stats.json" -o ./inp/
+    [ -f /inp/Stats.json ] && echo "yaay"
 
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
@@ -63,6 +68,8 @@ main() {
         project=${project%_clinicalgenetics}
         # project=$p
     fi
+
+    # Add code that runs the Python script with the coverage value and returns the output file into inp/
 
     # Rename inp folder to a more meaningful one for downstream processing
     mv inp "$(echo $project)-$(echo $ss)"
