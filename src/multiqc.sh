@@ -19,20 +19,32 @@ main() {
     mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
 
     # Download stats.json either from the project folder directly or from the run1 folder
-    [ -f "$project:/Stats.json" ] && dx download "$project:/Stats.json" -o ./inp/
-    [[ -f "$project:/run1/Stats.json" ]] && dx download "$project:/run1/Stats.json" -o ./inp/
-    [ -f /inp/Stats.json ] && echo "yaay"
+    # dx download "$project:/run1/Stats.json" -o ./inp/
+    sp=$(dx find data --brief --path ${project}: --name "Stats.json")
+    dx download sp -o ./inp/
+    ls inp
 
-    if [[ ! -z ${ms_for_multiqc} ]]; then
+    if [ -e $project:/"Stats.json" ]; then
+        dx download $project:/"Stats.json" -o ./inp/
+        echo "it's in the project"
+    fi
+    if [ -e $project:/run1/"Stats.json" ]; then
+        dx download $project:/run1/"Stats.json" -o ./inp/
+        echo "it's in the project:/run1 folder"
+    fi
+    #Once it's downloaded, check that it is present in inp
+    if [ -e /inp/Stats.json ]; then
+        echo "yaay"
+    fi
+    ls inp
+
+    # Get all the QC files (stored in project:/output/single/app/? folders
+                        #         and project:/output/single/multi/happy
+                        #    OR project:/folder) and put into 'inp'
+    if [[ ! -z ${ms_for_multiqc} ]]; then # could also use -n instead of ! -z
         echo "Has single and multi-sample workflow provided"
         ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
-
-        # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
-        # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
         wfdir="$project:/output/$ss"
-
-        # Download HSmetrics.tsv files into separate folder for custom coverage calculation
-        dx download ${wfdir}/"*picard*"/QC/"*hsmetrics.tsv" -o ./calc_cov/
 
         # Download happy reports from the multi_sample workflow
         for h in $(dx ls ${wfdir}/"$ms" --folders); do
@@ -40,11 +52,13 @@ main() {
                 dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
             fi
         done
-
         # Download all reports from the single_sample workflow output folders
         for f in $(dx ls ${wfdir} --folders); do
-            # echo "Searching for reports"
-            if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
+            if [[ $f == *picard*/ ]]; then
+                dx download ${wfdir}/"$f"/QC/* -o ./inp/
+                # Download HSmetrics.tsv files into separate folder for custom coverage calculation
+                dx download ${wfdir}/"$f"/QC/"*hsmetrics.tsv" -o ./calc_cov/
+            elif [[ $f == *verifybamid*/ ]]; then
                 dx download ${wfdir}/"$f"/QC/* -o ./inp/
             elif [[ $f == *sentieon*/ ]]; then
                 for s in $(dx ls ${wfdir}/"$f" --folders); do
@@ -60,6 +74,8 @@ main() {
         dx download $project:/$ss/"*hsmetrics.tsv" -o ./calc_cov/
         ss=${ss//\//-}
     fi
+    echo "calc_cov files"
+    ls calc_cov
 
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
@@ -72,6 +88,8 @@ main() {
     fi
 
     # Add code that runs the Python script with the coverage value and returns the output file into inp/
+    pip install pandas
+    python3 calc_custom_coverage.py calc_cov coverage
 
     # Rename inp folder to a more meaningful one for downstream processing
     mv inp "$(echo $project)-$(echo $ss)"
