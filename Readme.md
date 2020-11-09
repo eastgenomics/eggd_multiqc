@@ -10,17 +10,19 @@ Docker image avaialable here: https://hub.docker.com/repository/docker/sophie22/
 To visualise QC reports, this app should be run at the end of an NGS pipeline, when all QC software outputs are available.
 
 ## What data are required for this app to run?
+* config_file.yaml - A config file specifying which modules to run and the search patterns to recognise QC files for each module
+* optional to input a value for target bases coverage calculation above 100x
+* input data that may come from different sources:
 Option 1:
 * project name and a 
-* specific folder (or subfolder) in the project with all QC output
-
+* specific folder (or folder/subfolder) in the project with all QC output files
+ 
 Option 2:
 * *project_for_multiQC* - The name of the project to be assessed. (like 002_200430_DiasBatch)
   - This project must have an 'output' folder in its root directory.
 * *single_sample_workflow_for_multiQC* - The exact name of a ss run. (like dias_v1.0.0-200430-1) 
   - This folder must have subfolders for each QC app. (like ss/verifybamid or ss/fastqc)
 * *multi_sample_workflow_for_multiQC* - The exact name of a ms run. (like multi_v1.0.0-200430-1) OPTIONAL
-* config_file.yaml - A config file specifying which modules to run and the search patterns to recognise QC files for each module
 
 Please note that the app 'manually' downloads QC output files from the relevant tools' output folders named after the app. The app names MUST contain the module terms:
 'vcfeval', 'picard', 'sentieon', 'verifybamid', 'fastqc', 'samtools', 'vcf_qc'
