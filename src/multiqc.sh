@@ -22,7 +22,6 @@ main() {
     # dx download "$project:/run1/Stats.json" -o ./inp/
     sp=$(dx find data --brief --path ${project}: --name "Stats.json")
     dx download $sp -o ./inp/
-    ls inp
 
     # Get all the QC files (stored in project:/output/single/app/? folders
                         #         and project:/output/single/multi/happy
@@ -74,7 +73,6 @@ main() {
     # Add code that runs the Python script with the coverage value and returns the output file into inp/
     pip install pandas  # should control which version of pandas is used
     python3 calc_custom_coverage.py calc_cov $coverage
-    ls inp
 
     # Rename inp folder to a more meaningful one for downstream processing
     mv inp "$(echo $project)-$(echo $ss)"
