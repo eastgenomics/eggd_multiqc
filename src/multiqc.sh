@@ -21,7 +21,9 @@ main() {
     # Download stats.json either from the project folder directly or from the run1 folder
     # dx download "$project:/run1/Stats.json" -o ./inp/
     sp=$(dx find data --brief --path ${project}: --name "Stats.json")
-    dx download $sp -o ./inp/
+    if [[ ! -z $sp ]]; then
+        dx download $sp -o ./inp/
+    fi
 
     # Get all the QC files (stored in project:/output/single/app/? folders
                         #         and project:/output/single/multi/happy
