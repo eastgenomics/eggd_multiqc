@@ -16,7 +16,8 @@ coverage = args.coverage
 
 # Go through each file in the folder, parse the files' section after ##something into a dataframe
     # then calculate target bases coverage of each sample and write to a file
-with open("inp/custom_coverage.csv", 'w') as cc:
+with open("inp/custom_coverage_"+str(coverage)+"x.csv", 'w') as cc:
+    cc.write("Sample,percentage"+"\n")
     for file in os.listdir(folder):
         hs_data = pd.read_csv(folder+"/"+file, sep='\t', header=8,
                           usecols=["coverage_or_base_quality", "high_quality_coverage_count"])
