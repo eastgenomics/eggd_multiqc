@@ -1,6 +1,6 @@
 {
-  "name": "MultiQC_v1.1.0",
-  "title": "MultiQC_v1.1.0",
+  "name": "MultiQC_v1.1.1_dev",
+  "title": "MultiQC_v1.1.1_dev",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
@@ -24,13 +24,13 @@
     {
       "name": "ss_for_multiqc",
       "label": "Single sample workflow output directory, eg 'dias_v1.0.0-200430-1'",
-      "help": "Name of the directory that holds the QC data, in format ss_workflow_version-date-number, eg 'dias_v1.0.0-200430-1'",
+      "help": "Name of the directory that holds the QC data: single sample workflow OR a single folder within the project",
       "optional": false,
       "class": "string"
     },
     {
       "name": "ms_for_multiqc",
-      "label": "Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
+      "label": "OPTIONAL Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
       "help": "Name of the directory that holds the multi sample workflow output data, in format ms_workflow_version-date-number, eg 'multi_v1.0.0-200430-1'",
       "optional": true,
       "class": "string"

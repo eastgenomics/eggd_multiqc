@@ -2,7 +2,8 @@
 
 multiqc
 forked from ewels/MultiQC [v1.9](https://github.com/ewels/MultiQC/)
-East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/tree/eggd_multiqc) eggd_multiqc branch has been dockerised
+East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/tree/eggd_multiqc)
+The eggd_multiqc branch has been dockerised
 Docker image avaialable here: https://hub.docker.com/repository/docker/sophie22/multiqc_egg
 
 ## What are the typical use cases for this app?
