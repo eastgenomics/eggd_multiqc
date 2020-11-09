@@ -21,21 +21,7 @@ main() {
     # Download stats.json either from the project folder directly or from the run1 folder
     # dx download "$project:/run1/Stats.json" -o ./inp/
     sp=$(dx find data --brief --path ${project}: --name "Stats.json")
-    dx download sp -o ./inp/
-    ls inp
-
-    if [ -e $project:/"Stats.json" ]; then
-        dx download $project:/"Stats.json" -o ./inp/
-        echo "it's in the project"
-    fi
-    if [ -e $project:/run1/"Stats.json" ]; then
-        dx download $project:/run1/"Stats.json" -o ./inp/
-        echo "it's in the project:/run1 folder"
-    fi
-    #Once it's downloaded, check that it is present in inp
-    if [ -e /inp/Stats.json ]; then
-        echo "yaay"
-    fi
+    dx download $sp -o ./inp/
     ls inp
 
     # Get all the QC files (stored in project:/output/single/app/? folders
