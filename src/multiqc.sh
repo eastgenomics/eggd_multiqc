@@ -60,8 +60,6 @@ main() {
         dx download $project:/$ss/"*hsmetrics.tsv" -o ./calc_cov/
         ss=${ss//\//-}
     fi
-    echo "calc_cov files"
-    ls calc_cov
 
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
@@ -74,8 +72,9 @@ main() {
     fi
 
     # Add code that runs the Python script with the coverage value and returns the output file into inp/
-    pip install pandas
+    pip install pandas  # should control which version of pandas is used
     python3 calc_custom_coverage.py calc_cov coverage
+    ls inp
 
     # Rename inp folder to a more meaningful one for downstream processing
     mv inp "$(echo $project)-$(echo $ss)"
