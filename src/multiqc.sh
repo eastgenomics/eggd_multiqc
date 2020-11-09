@@ -16,16 +16,24 @@ main() {
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
-    mkdir cov_calc  #stores HSmetrics.tsv files to calculate custom coverage
+    mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
+
+    # Download stats.json either from the project folder directly or from the run1 folder
+    [ -f "$project:/Stats.json" ] && dx download "$project:/Stats.json" -o ./inp/
+    [[ -f "$project:/run1/Stats.json" ]] && dx download "$project:/run1/Stats.json" -o ./inp/
+    [ -f /inp/Stats.json ] && echo "yaay"
 
     if [[ ! -z ${ms_for_multiqc} ]]; then
-        echo "Has single and multi_sample workflow provided"
-
+        echo "Has single and multi-sample workflow provided"
         ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
 
         # Get all the QC files (stored in output/run/app/? folder) and put into 'inp'
         # eg. 003_200415_DiasBatch:/output/dias_v1.0.0_DEV-200429-1/fastqc
         wfdir="$project:/output/$ss"
+
+        # Download HSmetrics.tsv files into separate folder for custom coverage calculation
+        dx download ${wfdir}/"*picard*"/QC/"*hsmetrics.tsv" -o ./calc_cov/
+
         # Download happy reports from the multi_sample workflow
         for h in $(dx ls ${wfdir}/"$ms" --folders); do
             if [[ $h == *vcfeval*/ ]]; then
@@ -38,8 +46,6 @@ main() {
             # echo "Searching for reports"
             if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
                 dx download ${wfdir}/"$f"/QC/* -o ./inp/
-                # Download HSmetrics.tsv files into separate folder for custom coverage calculation
-                dx download ${wfdir}/"$f"/QC/"*hsmetrics.tsv" -o ./cov_calc/
             elif [[ $f == *sentieon*/ ]]; then
                 for s in $(dx ls ${wfdir}/"$f" --folders); do
                     dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
@@ -51,13 +57,9 @@ main() {
     else
         echo "No ms given, assuming it is a single folder for MultiQC"
         dx download $project:/$ss/* -o ./inp/
+        dx download $project:/$ss/"*hsmetrics.tsv" -o ./calc_cov/
         ss=${ss//\//-}
     fi
-
-    #Download stats.json either from the project folder directly or from the run1 folder
-    [ -f "$project:/Stats.json" ] && dx download "$project:/Stats.json" -o ./inp/
-    [[ -f "$project:/run1/Stats.json" ]] && dx download "$project:/run1/Stats.json" -o ./inp/
-    [ -f /inp/Stats.json ] && echo "yaay"
 
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
