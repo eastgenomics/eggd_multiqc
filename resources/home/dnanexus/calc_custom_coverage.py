@@ -16,8 +16,8 @@ coverage = args.coverage
 
 # Go through each file in the folder, parse the files' section after ##something into a dataframe
     # then calculate target bases coverage of each sample and write to a file
-with open("inp/custom_coverage_"+str(coverage)+"x_mqc.csv", 'w') as cc:
-    cc.write("Sample,percentage"+"\n")
+with open("inp/custom_coverage_"+str(coverage)+"x_mqc.tsv", 'w') as cc:
+    cc.write("Sample\tpercentage"+"\n")
     for file in os.listdir(folder):
         hs_data = pd.read_csv(folder+"/"+file, sep='\t', header=8,
                           usecols=["coverage_or_base_quality", "high_quality_coverage_count"])
@@ -32,7 +32,7 @@ with open("inp/custom_coverage_"+str(coverage)+"x_mqc.csv", 'w') as cc:
         if fn.endswith('.duplication') or fn.endswith('_duplication') or fn.endswith('.Duplication') or fn.endswith('_Duplication'):
             fn = fn[:-12]
         
-        line = "{},{:.2f}".format(fn, percentage)
+        line = "{}\t{:.2f}".format(fn, percentage)
         cc.write(line+"\n")
 print("Done")
 
