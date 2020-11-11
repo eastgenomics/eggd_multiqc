@@ -66,7 +66,6 @@ main() {
         # Add code that runs the Python script and returns the output file into inp/
         pip install pandas  # should control which version of pandas is used
         python3 calc_custom_coverage.py calc_cov
-        less inp/custom_coverage.csv
     fi
 
     # Rename inp folder to a more meaningful one for downstream processing
