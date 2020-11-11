@@ -1,6 +1,6 @@
 {
-  "name": "MultiQC_v1.1.1_dev",
-  "title": "MultiQC_v1.1.1_dev",
+  "name": "MultiQC_v1.1.1_devCC",
+  "title": "MultiQC_v1.1.1_devCC",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
@@ -37,10 +37,10 @@
     },
     {
       "name": "custom_coverage",
-      "label": "OPTIONAL custom target bases coverage to be calculated",
-      "help": "any value between 100 and 10,000",
+      "label": "OPTIONAL select if you want target bases coverage calculated at 200, 250, 300, 500 and 1000x",
+      "help": "otherwise restricted to %coverage at 1, 2, 10, 20, 30, 40, 50 and 100x",
       "optional": true,
-      "class": "int"
+      "class": "boolean"
     }
   ],
   "outputSpec": [
