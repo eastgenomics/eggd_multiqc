@@ -12,7 +12,7 @@ main() {
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
-    coverage=$(echo $custom_coverage)            # target bases coverage value (int)
+    #coverage=$(echo $custom_coverage)            # target bases coverage value (int)
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
@@ -43,8 +43,6 @@ main() {
         for f in $(dx ls ${wfdir} --folders); do
             if [[ $f == *picard*/ ]]; then
                 dx download ${wfdir}/"$f"/QC/* -o ./inp/
-                # Download HSmetrics.tsv files into separate folder for custom coverage calculation
-                dx download ${wfdir}/"$f"/QC/"*hsmetrics.tsv" -o ./calc_cov/
             elif [[ $f == *verifybamid*/ ]]; then
                 dx download ${wfdir}/"$f"/QC/* -o ./inp/
             elif [[ $f == *sentieon*/ ]]; then
@@ -62,6 +60,18 @@ main() {
         ss=${ss//\//-}
     fi
 
+    # If the option was selected to calculate additional coverage:
+    if [ $custom_coverage ]; then # executed when it's true
+        # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
+        cp inp/"*hsmetrics.tsv" calc_cov
+        # Add code that runs the Python script and returns the output file into inp/
+        pip install pandas  # should control which version of pandas is used
+        python3 calc_custom_coverage.py calc_cov
+        less inp/custom_coverage.csv
+    fi
+
+    # Rename inp folder to a more meaningful one for downstream processing
+    mv inp "$(echo $project)-$(echo $ss)"
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
         project=${project:4}
@@ -71,13 +81,6 @@ main() {
         project=${project%_clinicalgenetics}
         # project=$p
     fi
-
-    # Add code that runs the Python script with the coverage value and returns the output file into inp/
-    pip install pandas  # should control which version of pandas is used
-    python3 calc_custom_coverage.py calc_cov $coverage
-
-    # Rename inp folder to a more meaningful one for downstream processing
-    mv inp "$(echo $project)-$(echo $ss)"
 
     # Create the output folders that will be recognised by the job upon completion
     report_name="$(echo $project)-$(echo $ss)-multiqc"
