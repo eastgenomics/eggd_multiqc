@@ -56,14 +56,13 @@ main() {
     else
         echo "No ms given, assuming it is a single folder for MultiQC"
         dx download $project:/$ss/* -o ./inp/
-        dx download $project:/$ss/"*hsmetrics.tsv" -o ./calc_cov/
         ss=${ss//\//-}
     fi
 
     # If the option was selected to calculate additional coverage:
     if [ $custom_coverage ]; then # executed when it's true
         # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
-        cp inp/"*hsmetrics.tsv" calc_cov
+        cp inp/*hsmetrics.tsv calc_cov
         # Add code that runs the Python script and returns the output file into inp/
         pip install pandas  # should control which version of pandas is used
         python3 calc_custom_coverage.py calc_cov

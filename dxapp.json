@@ -37,7 +37,7 @@
     },
     {
       "name": "custom_coverage",
-      "label": "OPTIONAL select if you want target bases coverage calculated at 200, 250, 300, 500 and 1000x",
+      "label": "OPTIONAL Do you want target bases coverage to be calculated at 200, 250, 300, 500 and 1000x?",
       "help": "otherwise restricted to %coverage at 1, 2, 10, 20, 30, 40, 50 and 100x",
       "optional": true,
       "class": "boolean"
