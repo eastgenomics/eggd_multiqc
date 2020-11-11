@@ -4,26 +4,34 @@ import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('folder', type=str)
-parser.add_argument('coverage', type=int)
+# parser.add_argument('coverage', type=int)
 args = parser.parse_args()
 
 # This script is pointed to a folder in a fixed location /calc_cov
 folder = args.folder
 #print("folder {}".format(folder))
 # also takes a single int value as an input
-coverage = args.coverage
+# coverage = args.coverage
 #print("coverage {}".format(coverage))
 
 # Go through each file in the folder, parse the files' section after ##something into a dataframe
     # then calculate target bases coverage of each sample and write to a file
-with open("inp/custom_coverage_"+str(coverage)+"x.csv", 'w') as cc:
-    cc.write("Sample,percentage"+"\n")
+with open("inp/custom_coverage.csv", 'w') as ccc:
+    # Create header row
+    ccc.write("Sample,Coverage at 200x,Coverage at 250x,Coverage at 300x,Coverage at 500x,Coverage at 1000x,\n")
     for file in os.listdir(folder):
         hs_data = pd.read_csv(folder+"/"+file, sep='\t', header=8,
                           usecols=["coverage_or_base_quality", "high_quality_coverage_count"])
         total = sum(hs_data['high_quality_coverage_count'])
-        selected = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=coverage]['high_quality_coverage_count'])
-        percentage = selected/total*100
+
+        # Calculate the %coverage at each depth
+        200x = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=200]['high_quality_coverage_count'])/total*100
+        250x = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=250]['high_quality_coverage_count'])/total*100
+        300x = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=300]['high_quality_coverage_count'])/total*100
+        500x = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=500]['high_quality_coverage_count'])/total*100
+        1000x = sum(hs_data.loc[hs_data['coverage_or_base_quality']>=1000]['high_quality_coverage_count'])/total*100
+
+        # Get the sample name
         fn = file.rstrip('.hsmetrics.tsv')
         if fn.endswith('.markdup') or fn.endswith('_markdup'):
             fn = fn[:-8]
@@ -31,9 +39,10 @@ with open("inp/custom_coverage_"+str(coverage)+"x.csv", 'w') as cc:
             fn = fn[:-7]
         if fn.endswith('.duplication') or fn.endswith('_duplication') or fn.endswith('.Duplication') or fn.endswith('_Duplication'):
             fn = fn[:-12]
-        
-        line = "{},{:.2f}".format(fn, percentage)
-        cc.write(line+"\n")
+
+        # Write %coverage at each depth 1 sample/row
+        line = "{},{},{},{},{},{}".format(fn, 200x, 250x, 300x, 500x, 1000x)
+        ccc.write(line+"\n")
 print("Done")
 
 
