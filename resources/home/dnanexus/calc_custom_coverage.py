@@ -18,7 +18,7 @@ folder = args.folder
     # then calculate target bases coverage of each sample and write to a file
 with open("inp/custom_coverage.csv", 'w') as ccc:
     # Create header row
-    ccc.write("Sample,Coverage at 200x,Coverage at 250x,Coverage at 300x,Coverage at 500x,Coverage at 1000x\n")
+    ccc.write("Sample,200x,250x,300x,500x,1000x\n")
     for file in os.listdir(folder):
         hs_data = pd.read_csv(folder+"/"+file, sep='\t', header=8,
                           usecols=["coverage_or_base_quality", "high_quality_coverage_count"])
