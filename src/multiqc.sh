@@ -53,8 +53,9 @@ main() {
             fi
         done
     else
-        echo "No ms given, assuming it is a single folder for MultiQC"
+        echo "No ms given, assuming it is a single folder with a QC subfolder for MultiQC"
         dx download $project:/$ss/* -o ./inp/
+        dx download $project:/$ss/QC/* -o ./inp/
         ss=${ss//\//-}
     fi
 
