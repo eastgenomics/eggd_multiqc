@@ -12,25 +12,37 @@ main() {
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
+    wfdir="$project:/output/$ss"
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
-    mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
 
-    # Download stats.json either from the project folder directly or from the run1 folder
-    # dx download "$project:/run1/Stats.json" -o ./inp/
-    sp=$(dx find data --brief --path ${project}: --name "Stats.json")
-    if [[ ! -z $sp ]]; then
-        dx download $sp -o ./inp/
+    # Download stats.json from the project
+    stats=$(dx find data --brief --path ${project}: --name "Stats.json")
+    if [[ ! -z $stats ]]; then
+        dx download $stats -o ./inp/
     fi
 
-    # Get all the QC files (stored in project:/output/single/app/? folders
-                        #         and project:/output/single/multi/happy
-                        #    OR project:/folder) and put into 'inp'
+    ''' Get all the QC files (stored in project:/output/single/app/? folders
+                                    and project:/output/single/multi/happy '''
+
+    # Download all QC files from the workflow output folders
+    for f in $(dx ls ${wfdir} --folders); do
+        if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
+            dx download ${wfdir}/"$f"/QC/* -o ./inp/
+        elif [[ $f == *sentieon*/ ]]; then
+            for s in $(dx ls ${wfdir}/"$f" --folders); do
+                dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
+            done
+        elif [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+            dx download ${wfdir}/"$f"/* -o ./inp/
+        fi
+    done
+
+    # If a multi-sample workflow was given, download happy data
     if [[ ! -z ${ms_for_multiqc} ]]; then # could also use -n instead of ! -z
-        echo "Has single and multi-sample workflow provided"
+        echo "Has multi-sample workflow provided"
         ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
-        wfdir="$project:/output/$ss"
 
         # Download happy reports from the multi_sample workflow
         for h in $(dx ls ${wfdir}/"$ms" --folders); do
@@ -38,31 +50,21 @@ main() {
                 dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
             fi
         done
-        # Download all reports from the single_sample workflow output folders
-        for f in $(dx ls ${wfdir} --folders); do
-            if [[ $f == *picard*/ ]]; then
-                dx download ${wfdir}/"$f"/QC/* -o ./inp/
-            elif [[ $f == *verifybamid*/ ]]; then
-                dx download ${wfdir}/"$f"/QC/* -o ./inp/
-            elif [[ $f == *sentieon*/ ]]; then
-                for s in $(dx ls ${wfdir}/"$f" --folders); do
-                    dx download ${wfdir}/"$f"/"$s"/* -o ./inp/
-                done
-            elif [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
-                dx download ${wfdir}/"$f"/* -o ./inp/
-            fi
-        done
-    else
-        echo "No ms given, assuming it is a single folder with a QC subfolder for MultiQC"
-        dx download -r $project:/$ss -o ./inp/
-        ss=${ss//\//-}
+        
+    # else
+    #     echo "No ms given, assuming it is a single folder with a QC subfolder for MultiQC"
+    #     dx download -r $project:/$ss -o ./inp/
+    #     ss=${ss//\//-}
     fi
 
     # If the option was selected to calculate additional coverage:
     if [ $custom_coverage ]; then # executed when it's true
+        mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
+        
         # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
         cp inp/*hsmetrics.tsv calc_cov
-        # Add code that runs the Python script and returns the output file into inp/
+        
+        # Add code that runs the Python script, returns the output file into inp/
         pip install pandas  # should control which version of pandas is used
         python3 calc_custom_coverage.py calc_cov
     fi
