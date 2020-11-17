@@ -7,7 +7,7 @@ set -e -x -o pipefail
 main() {
 
     # Download the config file
-    dx download $eggd_multiqc_config_file
+    dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
@@ -54,8 +54,7 @@ main() {
         done
     else
         echo "No ms given, assuming it is a single folder with a QC subfolder for MultiQC"
-        dx download $project:/$ss/* -o ./inp/
-        dx download $project:/$ss/QC/* -o ./inp/
+        dx download -r $project:/$ss -o ./inp/
         ss=${ss//\//-}
     fi
 
@@ -87,10 +86,10 @@ main() {
 
     # Load the docker image and then run it
     docker load -i multiqc_egg.tar.gz
-    docker run -v /home/dnanexus:/egg sophie22/multiqc_egg:v1.0.0 /egg/"$(echo $project)-$(echo $ss)" -n /egg/${outdir}/$report_name.html -c /egg/$eggd_multiqc_config_file
+    docker run -v /home/dnanexus:/egg sophie22/multiqc_egg:v1.0.0 /egg/"$(echo $project)-$(echo $ss)" -n /egg/${outdir}/$report_name.html -c /egg/eggd_multiqc_config_file
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv $eggd_multiqc_config_file ${outdir}/$report_data/
+    mv eggd_multiqc_config_file ${outdir}/$report_data/
     # Move the multiqc report HTML to the output directory for uploading
     mv ${outdir}/$report_name.html ${report_outdir}
 
