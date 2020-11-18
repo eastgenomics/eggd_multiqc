@@ -1,6 +1,6 @@
 {
-  "name": "MultiQC_v1.1.1_devil",
-  "title": "MultiQC_v1.1.1_devil",
+  "name": "MultiQC_v1.1.1_dev3",
+  "title": "MultiQC_v1.1.1_dev3",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {

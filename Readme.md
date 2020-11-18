@@ -29,6 +29,7 @@ Please note that the app 'manually' downloads QC output files from the relevant 
 
 ## What does this app do?
 This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
+* bcl2fastq
 * VCFeval Hap.py - INDEL and SNP values are split into separate tables
 * Het-hom analysis (based on vcf_qc outputs)
 * Verifybamid

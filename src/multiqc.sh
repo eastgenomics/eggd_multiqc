@@ -23,8 +23,9 @@ main() {
         dx download $stats -o ./inp/
     fi
 
-    ''' Get all the QC files (stored in project:/output/single/app/? folders
-                                    and project:/output/single/multi/happy '''
+    # Get all the QC files (stored in project:/output/single/app/? folders
+                             #    and project:/output/single/multi/happy
+                             # OR in a single folder project:/single/*
 
     # Download all QC files from the workflow output folders
     for f in $(dx ls ${wfdir} --folders); do
@@ -50,11 +51,6 @@ main() {
                 dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
             fi
         done
-        
-    # else
-    #     echo "No ms given, assuming it is a single folder with a QC subfolder for MultiQC"
-    #     dx download -r $project:/$ss -o ./inp/
-    #     ss=${ss//\//-}
     fi
 
     # If the option was selected to calculate additional coverage:
@@ -78,7 +74,6 @@ main() {
     # Remove '_clinicalgenetics' from the end of the project name, if applicable
     if [[ "$project" == *_clinicalgenetics ]]; then
         project=${project%_clinicalgenetics}
-        # project=$p
     fi
 
     # Create the output folders that will be recognised by the job upon completion
