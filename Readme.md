@@ -11,20 +11,22 @@ To visualise QC reports, this app should be run at the end of an NGS pipeline, w
 ## What data are required for this app to run?
 * config_file.yaml - A config file specifying which modules to run and the search patterns to recognise QC files for each module
 * optional to calculate target bases coverage at 200x, 250x, 300x, 500x, 1000x
-* input data, may come from different sources:
-Option 1 for testing and development:
+* input data, which may come from different sources:
+Option 1 for production run on workflow output:
+* *project_for_multiQC* - The name of the project to be assessed. (like 002_200430_DiasBatch)
+  - This project must have an 'output' folder in its root directory (project:/output/).
+* *single_sample_workflow_for_multiQC* - The exact name of a ss run. (like dias_v1.0.0-200430-1) 
+  - This folder must have subfolders for each QC app. (like project:/output/workflow/app_output)
+* *multi_sample_workflow_for_multiQC* - The exact name of a ms run. (like project:/output/workflow/multi/happy) OPTIONAL
+
+Option 2 for testing and development:
+* set the single_folder input option to TRUE and provide a
 * project name and a 
 * specific folder (or subfolder) in the project with all QC output
+For example, if you want the files from project:/folder/subfolder/data_files, you need to input 'folder/subfolder'
+This will download all files, but will break if there are further subfolders.
 
-Option 2 for production run on workflow output:
-* *project_for_multiQC* - The name of the project to be assessed. (like 002_200430_DiasBatch)
-  - This project must have an 'output' folder in its root directory.
-* *single_sample_workflow_for_multiQC* - The exact name of a ss run. (like dias_v1.0.0-200430-1) 
-  - This folder must have subfolders for each QC app. (like ss/verifybamid or ss/fastqc)
-* *multi_sample_workflow_for_multiQC* - The exact name of a ms run. (like multi_v1.0.0-200430-1) OPTIONAL
-
-Please note that the app 'manually' downloads QC output files from the relevant tools' output folders named after the app. The app names MUST contain the module terms:
-'vcfeval', 'picard', 'sentieon', 'verifybamid', 'fastqc', 'samtools', 'vcf_qc'
+Please note that the app 'manually' downloads QC output files from the relevant tools' output folders named after the app. The app names MUST contain the module terms: 'picard', 'verifybamid', 'sentieon', 'fastqc', 'samtools', 'vcf_qc', 'vcfeval'
 and adhere to the specified outdir structure:
 picard/QC/data_files, verifybamid/QC/data_files, sentieon/sample_folder/data_files, other tools output all files into their folder
 
@@ -34,7 +36,7 @@ This app runs the East GLH fork of MultiQC to generate run wide quality control 
 * VCFeval Hap.py - INDEL and SNP values are split into separate tables
 * Het-hom analysis (based on vcf_qc outputs)
 * Verifybamid
-* Sentieon and Picard
+* Picard and Sentieon
 * Samtools/flagstat
 * FastQC 
 

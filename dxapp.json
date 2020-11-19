@@ -15,6 +15,13 @@
       "patterns": ["*.yaml"]
     },
     {
+      "name": "single_folder",
+      "label": "OPTIONAL select if you want to run MultiQC on a single data folder",
+      "help": "only and all files in project:/folder/* will be downloaded and passed to MultiQC ",
+      "optional": true,
+      "class": "boolean"
+    },
+    {
       "name": "project_for_multiqc",
       "label": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX'",
       "help": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX",
