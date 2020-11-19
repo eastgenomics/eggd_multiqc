@@ -12,7 +12,6 @@ main() {
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
-    wfdir="$project:/output/$ss"
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
@@ -28,6 +27,15 @@ main() {
                              # OR in a single folder project:/single/*
 
     # Download all QC files from the workflow output folders
+    wfdir="$project:/output/$ss"
+    for f in $(dx ls ${wfdir} --folders); do
+        if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]] || [[ $f == *sentieon*/ ]] || [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
+            for dx_file in $(dx find data --norecurse --brief --path ${wfdir}/$f);
+                do dx download $dx_file -o ./inp/;
+            done
+        fi
+    done
+
     for f in $(dx ls ${wfdir} --folders); do
         if [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
             dx download ${wfdir}/"$f"/QC/* -o ./inp/
