@@ -59,6 +59,20 @@ main() {
         ss=${ss//\//-}
     fi
 
+    # If the option was selected to calculate additional coverage:
+    if [ $custom_coverage ]; then # executed when it's true
+        mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
+        
+        # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
+        cp inp/*hsmetrics.tsv calc_cov
+        
+        # Add code that runs the Python script, returns the output file into inp/
+        pip install pandas  # should control which version of pandas is used
+        python3 calc_custom_coverage.py calc_cov
+    fi
+
+    # Rename inp folder to a more meaningful one for downstream processing
+    mv inp "$(echo $project)-$(echo $ss)"
     # Remove 002_ from the beginning of the project name, if applicable
     if [[ "$project" == 002_* ]]; then
         project=${project:4}
@@ -66,11 +80,7 @@ main() {
     # Remove '_clinicalgenetics' from the end of the project name, if applicable
     if [[ "$project" == *_clinicalgenetics ]]; then
         project=${project%_clinicalgenetics}
-        # project=$p
     fi
-
-    # Rename inp folder to a more meaningful one for downstream processing
-    mv inp "$(echo $project)-$(echo $ss)"
 
     # Create the output folders that will be recognised by the job upon completion
     report_name="$(echo $project)-$(echo $ss)-multiqc"

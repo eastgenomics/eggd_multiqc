@@ -34,6 +34,13 @@
       "help": "Name of the directory that holds the multi sample workflow output data, in format ms_workflow_version-date-number, eg 'multi_v1.0.0-200430-1'",
       "optional": true,
       "class": "string"
+    },
+    {
+      "name": "custom_coverage",
+      "label": "OPTIONAL Do you want target bases coverage to be calculated at 200, 250, 300, 500 and 1000x?",
+      "help": "otherwise restricted to %coverage at 1, 2, 10, 20, 30, 40, 50 and 100x",
+      "optional": true,
+      "class": "boolean"
     }
   ],
   "outputSpec": [

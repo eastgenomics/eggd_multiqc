@@ -10,6 +10,7 @@ To visualise QC reports, this app should be run at the end of an NGS pipeline, w
 
 ## What data are required for this app to run?
 * config_file.yaml - A config file specifying which modules to run and the search patterns to recognise QC files for each module
+* optional to calculate target bases coverage at 200x, 250x, 300x, 500x, 1000x
 * input data, may come from different sources:
 Option 1 for testing and development:
 * project name and a 
