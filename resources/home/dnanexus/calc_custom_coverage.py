@@ -10,8 +10,9 @@ args = parser.parse_args()
 # This script is pointed to a folder in a fixed location /calc_cov
 folder = args.folder
 
-# Go through each file in the folder, parse the files' section after ##something into a dataframe
-    # then calculate target bases coverage of each sample and write to a file
+# Go through each file in the folder
+# parse the files' section after ##HISTOGRAM into a dataframe
+# then calculate target bases coverage of each sample and write to a file
 with open("inp/custom_coverage.csv", 'w') as ccc:
     # Create header row
     ccc.write("Sample,200x,250x,300x,500x,1000x\n")
