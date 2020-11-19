@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.1.0
+# multiqc 1.1.1
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -15,6 +15,15 @@ main() {
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
+
+    # Download stats.json from the project
+    stats=$(dx find data --brief --path ${project}: --name "Stats.json")
+    if [[ ! -z $stats ]]; then
+        dx download $stats -o ./inp/
+    fi
+
+    # Get all the QC files (stored in project:/output/single/app/? folders
+                             #    and project:/output/single/multi/happy
 
     if [[ ! -z ${ms_for_multiqc} ]]; then
         echo "Has single and multi_sample workflow provided"
