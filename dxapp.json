@@ -19,6 +19,7 @@
       "label": "OPTIONAL select if you want to run MultiQC on a single data folder",
       "help": "only and all files in project:/folder/* will be downloaded and passed to MultiQC ",
       "optional": true,
+      "default": false,
       "class": "boolean"
     },
     {
@@ -47,6 +48,7 @@
       "label": "OPTIONAL Do you want target bases coverage to be calculated at 200, 250, 300, 500 and 1000x?",
       "help": "otherwise restricted to %coverage at 1, 2, 10, 20, 30, 40, 50 and 100x",
       "optional": true,
+      "default": false,
       "class": "boolean"
     }
   ],
