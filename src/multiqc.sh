@@ -25,7 +25,9 @@ main() {
         (true)       # development
             echo "Downloading all files from the given project:/folder"
             dx download $project:/$ss/* -o ./inp/
-            ss=${ss//\//-}
+            # substitute '\' with '-' in the single folder path
+            renamed=${ss//\//-}
+            ss=$renamed
             ;;
         (false)      # production
             echo "Downloading all files from project:/output/workflow/apps"
@@ -69,7 +71,7 @@ main() {
             cp inp/*hsmetrics.tsv calc_cov
             
             # Add code that runs the Python script, returns the output file into inp/
-            pip install pandas  # should control which version of pandas is used
+            pip install 'pandas==0.24.2'  # control which version of pandas is used
             python3 calc_custom_coverage.py calc_cov
             ;;
     esac
