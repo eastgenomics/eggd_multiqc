@@ -1,10 +1,10 @@
 {
-  "name": "MultiQC_v1.1.0",
-  "title": "MultiQC_v1.1.0",
+  "name": "MultiQC_v1.1.1",
+  "title": "MultiQC_v1.1.1",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
-    "githubRelease": "v1.1.0"
+    "githubRelease": "v1.1.1"
   },
   "inputSpec": [
     {
@@ -15,6 +15,13 @@
       "patterns": ["*.yaml"]
     },
     {
+      "name": "single_folder",
+      "label": "OPTIONAL select if you want to run MultiQC on a single data folder",
+      "help": "only and all files in project:/folder/* will be downloaded and passed to MultiQC ",
+      "optional": true,
+      "class": "boolean"
+    },
+    {
       "name": "project_for_multiqc",
       "label": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX'",
       "help": "Project that holds QC outputs, eg '002_200306_K00178_0254_AHGGF7BBX",
@@ -23,17 +30,24 @@
     },
     {
       "name": "ss_for_multiqc",
-      "label": "Single sample workflow output directory, eg 'dias_v1.0.0-200430-1'",
-      "help": "Name of the directory that holds the QC data, in format ss_workflow_version-date-number, eg 'dias_v1.0.0-200430-1'",
+      "label": "Single sample workflow output directory, eg 'dias_v1.0.0-200430-1' OR a specific folder within the project",
+      "help": "Name of the directory that holds the QC data: workflow OR a single folder within the project eg 'workflow_output/run1'",
       "optional": false,
       "class": "string"
     },
     {
       "name": "ms_for_multiqc",
-      "label": "Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
+      "label": "OPTIONAL Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
       "help": "Name of the directory that holds the multi sample workflow output data, in format ms_workflow_version-date-number, eg 'multi_v1.0.0-200430-1'",
       "optional": true,
       "class": "string"
+    },
+    {
+      "name": "custom_coverage",
+      "label": "OPTIONAL Do you want target bases coverage to be calculated at 200, 250, 300, 500 and 1000x?",
+      "help": "otherwise restricted to %coverage at 1, 2, 10, 20, 30, 40, 50 and 100x",
+      "optional": true,
+      "class": "boolean"
     }
   ],
   "outputSpec": [
