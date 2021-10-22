@@ -1,16 +1,17 @@
 #!/bin/bash
-# multiqc 1.1.1
+# multiqc 1.1.2
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
 main() {
 
+    sudo apt-get install parallel -y
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
-    project=$(echo $project_for_multiqc | xargs) # project name
+    export project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
 
     # Make directory to pull in all QC files
@@ -45,9 +46,7 @@ main() {
                 elif [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
                     dx download ${wfdir}/"$f"/QC/* -o ./inp/
                 elif [[ $f == *sentieon*/ ]]; then
-                    for sample in $(dx ls ${wfdir}/"$f" --folders); do
-                        dx download ${wfdir}/"$f"/"$sample"/* -o ./inp/
-                    done
+                    dx ls ${wfdir}/"$f" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
                 fi
             done
             # Download happy reports from the multi_sample workflow, if provided
@@ -56,6 +55,9 @@ main() {
                 for h in $(dx ls ${wfdir}/"$ms" --folders); do
                     if [[ $h == *vcfeval*/ ]]; then
                         echo "Downloading happy files from project:/output/sinlge/multi/happy"
+                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
+                    elif [[ $h == *relate2multiqc*/ ]]; then
+                        echo "Downloading somalier files from project:/output/sinlge/multi/relate2multiqc"
                         dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
                     fi
                 done
@@ -102,6 +104,6 @@ main() {
     mv ${outdir}/$report_name.html ${report_outdir}
 
     # Upload results
-    dx-upload-all-outputs
+    dx-upload-all-outputs --parallel
 
 }

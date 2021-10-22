@@ -6,7 +6,7 @@ East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/tree/eggd_mult
 Docker image avaialable here: https://hub.docker.com/repository/docker/sophie22/multiqc_egg
 
 ## What are the typical use cases for this app?
-To visualise QC reports, this app should be run at the end of an NGS pipeline, when all QC software outputs are available.
+To visualise QC reports this app should be run at the end of an NGS pipeline when all QC software outputs are available.
 
 ## What data are required for this app to run?
 * config_file.yaml - A config file specifying which modules to run and the search patterns to recognise QC files for each module
@@ -31,14 +31,15 @@ and adhere to the specified outdir structure:
 picard/QC/data_files, verifybamid/QC/data_files, sentieon/sample_folder/data_files, other tools output all files into their folder
 
 ## What does this app do?
-This app runs the East GLH fork of MultiQC to generate run wide quality control (QC) using the outputs from 'our' pipelines including:
+This app runs the East GLH fork of MultiQC to generate run-wide quality control (QC) using the outputs from 'our' pipelines including:
 * bcl2fastq
 * VCFeval Hap.py - INDEL and SNP values are split into separate tables
 * Het-hom analysis (based on vcf_qc outputs)
 * Verifybamid
 * Picard and Sentieon
 * Samtools/flagstat
-* FastQC 
+* FastQC
+* somalier
 
 ## What does this app output?
 The following outputs are placed in the DNAnexus project in the specified output folder:
@@ -50,5 +51,13 @@ The following outputs are placed in the DNAnexus project in the specified output
 2. The app uses a modified version of MultiQC v1.9. This version differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name) and the happy module that shows SNP and indel precision/recall values in separate tables to allow for different thresholds to be set. The forked repo with all dependecies have been dockerised and a tarball of the docker image is in the /resources directory of the app.
 3. MultiQC parses all recognised files and includes them in the report.
 4. The MultiQC outputs are uploaded to DNAnexus.
+
+## How to run this app from command line?
+dx run multiqc-applet_ID \
+-ieggd_multiqc_config_file='{}' \
+-iproject_for_multiqc='{}' \
+-iss_for_multiqc='{}' \
+-ims_for_multiqc='{}' \
+--destination='{}'
 
 ## This app was made by EMEE GLH
