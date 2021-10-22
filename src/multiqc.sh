@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.1.1
+# multiqc 1.1.2
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -57,6 +57,9 @@ main() {
                     if [[ $h == *vcfeval*/ ]]; then
                         echo "Downloading happy files from project:/output/sinlge/multi/happy"
                         dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
+                    elif [[ $h == *relate2multiqc*/ ]]; then
+                        echo "Downloading somalier files from project:/output/sinlge/multi/relate2multiqc"
+                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
                     fi
                 done
             fi
@@ -102,6 +105,6 @@ main() {
     mv ${outdir}/$report_name.html ${report_outdir}
 
     # Upload results
-    dx-upload-all-outputs
+    dx-upload-all-outputs --parallel
 
 }
