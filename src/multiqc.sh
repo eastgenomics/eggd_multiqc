@@ -47,9 +47,6 @@ main() {
                     dx download ${wfdir}/"$f"/QC/* -o ./inp/
                 elif [[ $f == *sentieon*/ ]]; then
                     dx ls ${wfdir}/"$f" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
-                    # for sample in $(dx ls ${wfdir}/"$f" --folders); do
-                    #     dx download ${wfdir}/"$f"/"$sample"/* -o ./inp/
-                    # done
                 fi
             done
             # Download happy reports from the multi_sample workflow, if provided
