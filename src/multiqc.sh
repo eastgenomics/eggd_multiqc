@@ -6,11 +6,12 @@ set -e -x -o pipefail
 
 main() {
 
+    sudo apt-get install parallel -y
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
-    project=$(echo $project_for_multiqc | xargs) # project name
+    export project=$(echo $project_for_multiqc | xargs) # project name
     ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
 
     # Make directory to pull in all QC files
@@ -45,9 +46,10 @@ main() {
                 elif [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
                     dx download ${wfdir}/"$f"/QC/* -o ./inp/
                 elif [[ $f == *sentieon*/ ]]; then
-                    for sample in $(dx ls ${wfdir}/"$f" --folders); do
-                        dx download ${wfdir}/"$f"/"$sample"/* -o ./inp/
-                    done
+                    dx ls ${wfdir}/"$f" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
+                    # for sample in $(dx ls ${wfdir}/"$f" --folders); do
+                    #     dx download ${wfdir}/"$f"/"$sample"/* -o ./inp/
+                    # done
                 fi
             done
             # Download happy reports from the multi_sample workflow, if provided
