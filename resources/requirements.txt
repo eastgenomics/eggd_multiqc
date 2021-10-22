@@ -13,6 +13,7 @@ matplotlib==2.2.5
 multiqc
 networkx==2.2
 numpy==1.16.6
+pandas==0.24.2
 pyparsing==2.4.7
 pytz==2020.1
 setuptools==49.6.0
