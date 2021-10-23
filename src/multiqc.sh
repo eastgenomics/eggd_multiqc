@@ -95,8 +95,8 @@ main() {
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
 
     # Load the docker image and then run it
-    docker load -i multiqc_egg.tar.gz
-    docker run -v /home/dnanexus:/egg sophie22/multiqc_egg:v1.0.0 /egg/"$(echo $project)-$(echo $ss)" -n /egg/${outdir}/$report_name.html -c /egg/eggd_multiqc_config_file
+    docker load -i multiqc_v1.11.tar.gz
+    docker run -v /home/dnanexus:/egg ewels/multiqc:v1.11 /egg/"$(echo $project)-$(echo $ss)" -c /egg/eggd_multiqc_config_file -n /egg/${outdir}/$report_name.html
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv eggd_multiqc_config_file ${outdir}/$report_data/
