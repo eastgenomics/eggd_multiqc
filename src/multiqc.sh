@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.1.2
+# multiqc 1.2.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -12,7 +12,7 @@ main() {
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
     export project=$(echo $project_for_multiqc | xargs) # project name
-    ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
+    ss=$(echo $ss_for_multiqc | xargs)           # main workflow name or absolut path to single folder
 
     # Make directory to pull in all QC files
     mkdir inp   # stores files to be used as input for MultiQC
@@ -24,7 +24,7 @@ main() {
 
     case $single_folder in
         (true)       # development
-            echo "Downloading all files from the given project:/folder"
+            echo "Downloading all files from the given project:/path/to/folder"
             dx download $project:/$ss/* -o ./inp/
             # substitute '\' with '-' in the single folder path
             renamed=${ss//\//-}
@@ -32,33 +32,33 @@ main() {
             ;;
         (false)      # production
             echo "Downloading all files from project:/output/workflow/apps"
-            wfdir="$project:/output/$ss"
-            # Download stats.json from the project
+            workflowdir="$project:/output/$ss"
+            # Download Stats.json from the project
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
                 echo "Downloading Stats.json from the given project"
                 dx download $stats -o ./inp/
             fi
-            # Download all reports from the single_sample workflow output folders
-            for f in $(dx ls ${wfdir} --folders); do
-                if [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
-                    dx download ${wfdir}/"$f"/* -o ./inp/
-                elif [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
-                    dx download ${wfdir}/"$f"/QC/* -o ./inp/
-                elif [[ $f == *sentieon*/ ]]; then
-                    dx ls ${wfdir}/"$f" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
+            # Download all qc metrics from the main or single_sample workflow output folders
+            for folder in $(dx ls ${workflowdir} --folders); do
+                if [[ $folder == *fastqc*/ ]] || [[ $folder == *samtools*/ ]] || [[ $folder == *vcf_qc*/ ]]; then
+                    dx download ${workflowdir}/"$folder"/* -o ./inp/
+                elif [[ $folder == *picard*/ ]] || [[ $folder == *verifybamid*/ ]]; then
+                    dx download ${workflowdir}/"$folder"/QC/* -o ./inp/
+                elif [[ $folder == *sentieon*/ ]]; then
+                    dx ls ${workflowdir}/"$folder" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
                 fi
             done
-            # Download happy reports from the multi_sample workflow, if provided
+            # Download all qc metrics from the multi_sample workflow, if provided
             if [[ ! -z ${ms_for_multiqc} ]]; then
                 ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
-                for h in $(dx ls ${wfdir}/"$ms" --folders); do
-                    if [[ $h == *vcfeval*/ ]]; then
+                for folder in $(dx ls ${workflowdir}/"$ms" --folders); do
+                    if [[ $folder == *vcfeval*/ ]]; then
                         echo "Downloading happy files from project:/output/sinlge/multi/happy"
-                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
-                    elif [[ $h == *relate2multiqc*/ ]]; then
+                        dx download ${workflowdir}/"$ms"/"$folder"/* -o ./inp/
+                    elif [[ $folder == *relate2multiqc*/ ]]; then
                         echo "Downloading somalier files from project:/output/sinlge/multi/relate2multiqc"
-                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
+                        dx download ${workflowdir}/"$ms"/"$folder"/* -o ./inp/
                     fi
                 done
             fi
