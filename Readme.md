@@ -1,9 +1,8 @@
 # MultiQC (DNAnexus Platform App)
 
 multiqc
-forked from ewels/MultiQC [v1.9](https://github.com/ewels/MultiQC/)
-East GLH fork of MultiQC (https://github.com/eastgenomics/MultiQC/tree/eggd_multiqc) eggd_multiqc branch has been dockerised
-Docker image avaialable here: https://hub.docker.com/repository/docker/sophie22/multiqc_egg
+using the ewels/MultiQC [v1.11](https://github.com/ewels/MultiQC/tree/v1.11)
+Docker image avaialable here: https://hub.docker.com/r/ewels/multiqc/tags v1.11
 
 ## What are the typical use cases for this app?
 To visualise QC reports this app should be run at the end of an NGS pipeline when all QC software outputs are available.
@@ -59,5 +58,9 @@ dx run multiqc-applet_ID \
 -iss_for_multiqc='{}' \
 -ims_for_multiqc='{}' \
 --destination='{}'
+
+## How was the asset created?
+docker pull ewels/multiqc:v1.11
+docker save ewels/multiqc:v1.11 | gzip > multiqc_v1.11.tar.gz
 
 ## This app was made by EMEE GLH
