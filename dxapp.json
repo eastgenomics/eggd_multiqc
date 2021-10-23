@@ -1,15 +1,16 @@
 {
-  "name": "MultiQC_v1.1.2",
-  "title": "MultiQC_v1.1.2",
+  "name": "MultiQC_v1.2.0",
+  "title": "MultiQC_v1.2.0",
   "summary": "Multiqc -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "properties": {
-    "githubRelease": "v1.1.2"
+    "githubRelease": "v1.2.0"
   },
   "inputSpec": [
     {
       "name": "eggd_multiqc_config_file",
       "label": "MultiQC config file",
+      "help": "must have an 'sp' key that specify all modules to be displayed in the report",
       "optional": false,
       "class": "file",
       "patterns": ["*.yaml"]
@@ -17,7 +18,7 @@
     {
       "name": "single_folder",
       "label": "OPTIONAL select if you want to run MultiQC on a single data folder",
-      "help": "only and all files in project:/folder/* will be downloaded and passed to MultiQC ",
+      "help": "only and all files in project:/path/to/folder/* will be downloaded and passed to MultiQC",
       "optional": true,
       "default": false,
       "class": "boolean"
@@ -31,14 +32,14 @@
     },
     {
       "name": "ss_for_multiqc",
-      "label": "Single sample workflow output directory, eg 'dias_v1.0.0-200430-1' OR a specific folder within the project",
-      "help": "Name of the directory that holds the QC data: workflow OR a single folder within the project eg 'workflow_output/run1'",
+      "label": "Output directory name of the main workflow, eg 'dias_v1.0.0-200430-1' OR a specific folder within the project",
+      "help": "Name of the directory that holds the QC data: single sample/main workflow OR absolut path to a single folder. Examples: 'dias_single_v#-TWE_v#-YYMMDD-1' or 'uranus_YYMMDD_1' or '/foo/bar/all_QC_files/'",
       "optional": false,
       "class": "string"
     },
     {
       "name": "ms_for_multiqc",
-      "label": "OPTIONAL Multi sample workflow output directory, eg 'multi_v1.0.0-200430-1'",
+      "label": "OPTIONAL Multi-sample workflow output directory, eg ' dias_multi_v1.1.1-TWE_v1.0.6-YYMMDD-2'",
       "help": "Name of the directory that holds the multi sample workflow output data, in format ms_workflow_version-date-number, eg 'multi_v1.0.0-200430-1'",
       "optional": true,
       "class": "string"
