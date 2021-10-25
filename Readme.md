@@ -1,7 +1,7 @@
 # MultiQC (DNAnexus Platform App)
 
 multiqc
-using the ewels/MultiQC [v1.11](https://github.com/ewels/MultiQC/tree/v1.11)
+using ewels/MultiQC [v1.11](https://github.com/ewels/MultiQC/tree/v1.11)
 Docker image avaialable here: https://hub.docker.com/r/ewels/multiqc/tags v1.11
 
 ## What are the typical use cases for this app?
@@ -12,43 +12,34 @@ To visualise QC reports this app should be run at the end of an NGS pipeline whe
 * optional to calculate target bases coverage at 200x, 250x, 300x, 500x, 1000x
 * input data, which may come from different sources:
 Option 1 for production run on workflow output:
-* *project_for_multiQC* - The name of the project to be assessed. (like 002_200430_DiasBatch)
+* *project_for_multiqc* - The name of the project to be used. (like 002_211008_A01303_0030_AHKTMYDRXY_TWE)
   - This project must have an 'output' folder in its root directory (project:/output/).
-* *single_sample_workflow_for_multiQC* - The exact name of a ss run. (like dias_v1.0.0-200430-1) 
-  - This folder must have subfolders for each QC app. (like project:/output/workflow/app_output)
-* *multi_sample_workflow_for_multiQC* - The exact name of a ms run. (like project:/output/workflow/multi/happy) OPTIONAL
+* *single_sample_workflow_for_multiqc* - The exact name of a ss run. (like dias_single_v1.2.3-TWE_v1.0.5-211011-1) 
+  - This folder must have subfolders for each app. (like project:/output/workflow/app_output)
+* *multi_sample_workflow_for_multiqc* - The exact name of a ms run. (like project:/output/workflow/multi/happy) OPTIONAL
 
 Option 2 for testing and development:
 * set the single_folder input option to TRUE and provide a
-* project name and a 
-* specific folder (or subfolder) in the project with all QC output
-For example, if you want the files from project:/folder/subfolder/data_files, you need to input 'folder/subfolder'
-This will download all files, but will break if there are further subfolders.
+* project name and 
+* the absolut path to a specific folder in the project with all QC files
+For example, if you want files from project:/folder/subfolder/data_files, you need to input 'folder/subfolder' into the field
+This will download all files from only this folder and will break if there are further subfolders inside!
 
-Please note that the app 'manually' downloads QC output files from the relevant tools' output folders named after the app. The app names MUST contain the module terms: 'picard', 'verifybamid', 'sentieon', 'fastqc', 'samtools', 'vcf_qc', 'vcfeval'
-and adhere to the specified outdir structure:
-picard/QC/data_files, verifybamid/QC/data_files, sentieon/sample_folder/data_files, other tools output all files into their folder
+The qc metrics to be displayed in the report are specified by location and filename extension in the config.yaml under the "dx_sp" tag. It is essential to use a config file that has this section!!
 
 ## What does this app do?
-This app runs the East GLH fork of MultiQC to generate run-wide quality control (QC) using the outputs from 'our' pipelines including:
-* bcl2fastq
-* VCFeval Hap.py - INDEL and SNP values are split into separate tables
-* Het-hom analysis (based on vcf_qc outputs)
-* Verifybamid
-* Picard and Sentieon
-* Samtools/flagstat
-* FastQC
-* somalier
+This app runs MultiQC v1.11 tool to generate run-wide quality report using the outputs from the pipeline. Modules included are specified in the config file, the list of supported modules can be found [here] (https://github.com/ewels/MultiQC/tree/v1.11/multiqc/modules).
 
 ## What does this app output?
-The following outputs are placed in the DNAnexus project in the specified output folder:
-* a HTML QC report (with the name of the runfolder)
-* a folder containing the outputs in text format. (folder named after project-multiqc_data)
+The following outputs are placed in the DNAnexus project in the specified folder:
+* a HTML QC report (with the name of the runfolder-workflow)
+* a folder containing the qc metrics data in text format. (The folder is named after project-workflow-multiqc_data)
+* original config_file.yaml that was used to generate the report
 
 ## How does this app work?
-1. The app downloads all files within all the $project_for_multiQC/output/$ss_for_multiQC/QCapp directories of the project.
-2. The app uses a modified version of MultiQC v1.9. This version differs from the official release only in the addition of a Sentieon module that parses the Sentieon-dnaseq QC files (equivalent to the Picard modules of the same name) and the happy module that shows SNP and indel precision/recall values in separate tables to allow for different thresholds to be set. The forked repo with all dependecies have been dockerised and a tarball of the docker image is in the /resources directory of the app.
-3. MultiQC parses all recognised files and includes them in the report.
+1. The app downloads files within the $project_for_multiQC:/output/$ss_for_multiQC/QCapp directories of the project, where 'QCapp' and filename extensions are specified in the config file.
+2. The app runs the dockerised MultiQC v1.11 tool with the config file provided.
+3. MultiQC parses all recognised files and displays them in the report.
 4. The MultiQC outputs are uploaded to DNAnexus.
 
 ## How to run this app from command line?
@@ -59,7 +50,7 @@ dx run multiqc-applet_ID \
 -ims_for_multiqc='{}' \
 --destination='{}'
 
-## How was the asset created?
+## How was the Docker image created?
 docker pull ewels/multiqc:v1.11
 docker save ewels/multiqc:v1.11 | gzip > multiqc_v1.11.tar.gz
 
