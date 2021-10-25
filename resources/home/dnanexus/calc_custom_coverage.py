@@ -1,3 +1,4 @@
+# Python3
 import os
 import argparse
 import pandas as pd
@@ -46,7 +47,6 @@ with open("inp/custom_coverage.csv", 'w') as f:
         # Write %coverage at each depth 1 sample/row
         cov_line = ",".join([str(i) for i in p_cov])
         line = ",".join([fn, cov_line])
-        print(line)
         f.write(line+"\n")
 
 print("Done")
