@@ -1,0 +1,299 @@
+###################################################
+# Eggd MultiQC Configuration File for Myeloid
+###################################################
+
+# This file can be saved either in the MultiQC installation
+# directory, or as ~/.multiqc_config.yaml
+
+# Configuration settings are taken from the following locations, in order:
+# - Hardcoded in MultiQC (multiqc/utils/config.py)
+# - <installation_dir>/multiqc_config.yaml
+# - ~/.multiqc_config.yaml
+# - Command line options
+
+# Note that all of the values below are set to the MultiQC defaults.
+# It's recommended that you delete any that you don't need.
+
+#################################################################
+
+# Title to use for the report.
+title: East GLH MultiQC Report
+subtitle: Myeloid           # Grey text below title
+# intro_text: null          # Set to False to remove, or your own text
+
+# # Add generic information to the top of reports
+# report_header_info:
+#     - Example Config:: 'This is arbitrary'
+#     - Another field:: 'Loaded from <code>multiqc_config_example.yaml</code>'
+#     - Something different:: 'You can put any key-value pairs here'
+#     - Want to know more?: 'See the <a href="http://multiqc.info/docs" target="_blank">MultiQC docs</a>'
+# # Specify a custom logo to add to reports (uncomment to use)
+# custom_logo: 'link to egglogo.png'         # '/path/to/logo.png'
+# custom_logo_url: 'https://cuhbioinformatics.atlassian.net/servicedesk/customer/portal/3'     # 'https://www.example.com'
+# custom_logo_title: 'Bioinformatics Help Desk'   # 'Our Institute Name'
+
+# Default output filenames
+output_fn_name: multiqc_report.html
+data_dir_name: multiqc_data
+
+# Prepend sample names with their directory. Useful if analysing the
+# sample samples with different parameters.
+prepend_dirs: False
+# Whether to create the parsed data directory in addition to the report
+make_data_dir: True
+
+# Cleaning options for sample names. Typically, sample names are detected
+# from an input filename. If any of these strings are found, they and any
+# text to their right will be discarded.
+# For example - file1.fq.gz_trimmed.bam_deduplicated_fastqc.zip
+# would be cleaned to 'file1'
+# Two options here - fn_clean_exts will replace the defaults,
+# extra_fn_clean_exts will append to the defaults
+extra_fn_clean_exts:
+    - type: remove
+      pattern: '_001'
+    - type: remove
+      pattern: '.markdup'
+    - type: remove
+      pattern: '_markdup'
+    - type: remove
+      pattern: '.realigned'
+    - type: remove
+      pattern: '_metrics'
+    - type: remove
+      pattern: '.Duplication_metrics'
+    - type: remove
+      pattern: '.Duplication'
+    - type: remove
+      pattern: '.duplication'
+    - type: remove
+      pattern: '.AlignmentStat'
+    - type: remove
+      pattern: '.GCBias'
+    - type: remove
+      pattern: '.InsertSize'
+    - type: remove
+      pattern: '.MeanQualityByCycle_metrics'
+    - type: remove
+      pattern: '.QualDistribution_metrics'
+
+# Ignore files larger than this when searcing for logs (bytes)
+log_filesize_limit: 5000000000
+# MultiQC skips a couple of debug messages when searching files as the
+# log can get very verbose otherwise. Re-enable here to help debugging.
+report_readerrors: False
+report_imgskips: False
+# Opt-out of remotely checking that you're running the latest version
+no_version_check: False
+
+# How to plot graphs. Different templates can override these settings, but
+# the default template can use interactive plots (Javascript using HighCharts)
+# or flat plots (images, using MatPlotLib). With interactive plots, the report
+# can prevent automatically rendering all graphs if there are lots of samples
+# to prevent the browser being locked up when the report opens.
+plots_force_flat: False          # Try to use only flat image graphs
+plots_force_interactive: False   # Try to use only interactive javascript graphs
+plots_flat_numseries: 200        # If neither of the above, use flat if > this number of datasets
+num_datasets_plot_limit: 100      # If interactive, don't plot on load if > this number of datasets
+max_table_rows: 500              # Swap tables for a beeswarm plot above this
+
+# Overwrite module order (in report).
+# See multiqc/utils/config_defaults.yaml for the defaults.
+module_order:
+    - 'custom_content'
+    - verifybamid:
+        module_tag:
+            - DNA
+    - picard:
+        module_tag:
+            - DNA
+    - samtools:
+        module_tag:
+            - DNA
+    - fastqc:
+        module_tag:
+            - DNA
+
+# Overwrite the defaults of which table columns are visible by default
+# in the General Statistics table
+table_columns_visible:
+    custom_coverage:
+        200x: False
+        300x: False
+        500x: False
+        1000x: False
+    verifyBAMID:
+        CHIPMIX: False
+    Picard:
+        PERCENT_DUPLICATION: False
+        PCT_TARGET_BASES_100X: False
+        TOTAL_READS: False
+        PCT_PF_READS_ALIGNED: False
+        MEDIAN_TARGET_COVERAGE: False
+        FOLD_ENRICHMENT: False
+    bcl2fastq: False
+    FastQC: False
+
+# Specify order in which table columns are visible in General Statistics
+table_columns_placement:
+    general_stats_table:
+        mapped_passed: 930         # M Reads Mapped
+        FREEMIX: 940               # contamination
+        250x: 950                  # coverage at 250x
+        summed_median: 960
+        PCT_AMPLIFIED_BASES: 970
+
+# Set picard configs
+picard_config:
+    general_stats_target_coverage: # should be referred to as 'mqc-generalstats-picard-PCT_TARGET_BASES_20X'
+        - 100                           # for conditional table formatting
+
+table_cond_formatting_colours:
+    - blue: '#337ab7'
+    - lbue: '#5bc0de'
+    - pass: '#5cb85c'
+    - warn: '#f0ad4e'
+    - fail: '#d9534f'
+
+# Set conditional formatting rules
+table_cond_formatting_rules:
+    # Columns in the General Statistics table
+    mqc-generalstats-custom_coverage-250x:
+        pass:
+            - lt: 101
+        warn:
+            - eq: 90.0
+            - lt: 90.0
+    mqc-generalstats-verifybamid-FREEMIX: #verifyBamId Contaminntion column in General Stats
+        pass:
+            - lt: 10
+        warn:
+            - eq: 10
+            - gt: 10
+    mqc-generalstats-picard-PCT_AMPLIFIED_BASES: # % Amplified Bases
+        pass:
+            - gt: 50
+        warn:
+            - eq: 50
+            - lt: 50
+    mqc-generalstats-picard-summed_median: # Picard Median Insert Size
+        pass:
+            - gt: 150
+        warn:
+            - eq: 150
+            - lt: 150
+    # Columns in tables from other modules
+    FREEMIX: #verifyBamId Contamination column in verifybamid
+        pass:
+            - lt: 10
+        warn:
+            - eq: 10
+            - gt: 10
+    FOLD_80_BASE_PENALTY: # Picard HSMetrics fold 80 base penalty column
+        pass:
+            - lt: 1.80
+        warn:
+            - eq: 1.80
+            - gt: 1.80
+
+# Add code to include data from custom QC reports
+custom_data:
+    custom_coverage:
+        file_format: 'csv'
+        plot_type: 'generalstats'
+        pconfig:
+            - 200x: # same as in the csv column name
+                description: 'Target bases coverage at custom depth'
+                title: '%coverage at 200x'
+                max: 100
+                min: 0
+                suffix: '%'
+            - 250x:
+                description: 'Target bases coverage at custom depth'
+                title: '%coverage at 250x'
+                max: 100
+                min: 0
+                suffix: '%'
+            - 300x:
+                description: 'Target bases coverage at custom depth'
+                title: '%coverage at 300x'
+                max: 100
+                min: 0
+                suffix: '%'
+            - 500x:
+                description: 'Target bases coverage at custom depth'
+                title: '%coverage at 500x'
+                max: 100
+                min: 0
+                suffix: '%'
+            - 1000x:
+                description: 'Target bases coverage at custom depth'
+                title: '%coverage at 1000x'
+                max: 100
+                min: 0
+                suffix: '%'
+
+# Overwrite module filename search patterns. See multiqc/utils/search_patterns.yaml
+# for the defaults. Remove a default by setting it to null.
+sp:
+    fastqc/data:
+        fn: '*.stats-fastqc.txt'
+    sentieon/alignment_metrics:
+        fn: '*.alignment_summary_metrics'
+        shared: true
+    picard/insertsize:
+        fn: '*.insert_size_metrics'
+        shared: true
+    picard/hsmetrics:
+        fn: '*.hsmetrics.tsv'
+        shared: true
+    picard/gcbias:
+        fn: '*.gc_bias.detail_metrics'
+        shared: true
+    picard/pcr_metrics:
+        fn: '*.pertarget_coverage.tsv'
+        shared: true
+    picard/quality_by_cycle:
+        fn: '*.quality_by_cycle_metrics'
+        shared: true
+    picard/quality_score_distribution:
+        fn: '*.quality_distribution_metrics'
+        shared: true
+    verifybamid/selfsm:
+        fn: '*.selfSM'
+    samtools/flagstat:
+        contents: 'in total (QC-passed reads + QC-failed reads)'
+        shared: true
+    vcf_qc_files:
+        fn: '*.vcf.QC'
+    custom_coverage:
+        fn: 'custom_coverage.csv'
+
+# Remove plots from HTML report
+remove_sections:
+    - picard_hsmetrics_target_bases # Target Region Coverage plot
+    - fastqc_per_base_sequence_content # -  Per Base Sequence Content plot
+
+exclude_modules:
+  - sentieon
+  - bcl2fastq
+
+# Specify location and file extensions of QC metrics to be downloaded
+# to the workstation by the app:
+dx_sp:
+    primary:
+        fastqc:
+            - '*.stats-fastqc.txt'
+        picard/QC:
+            - '*.alignment_summary_metrics'
+            - '*.hsmetrics.tsv'
+            - '*.gc_bias.detail_metrics'
+            - '*.insert_size_metrics'
+            - '*.pertarget_coverage.tsv'
+            # - '*.quality_by_cycle_metrics'
+            # - '*.quality_distribution_metrics'
+        verifybamid/QC:
+            - '*.selfSM'
+            # - '*.depthSM'
+        samtools:
+            - '*.flagstat'

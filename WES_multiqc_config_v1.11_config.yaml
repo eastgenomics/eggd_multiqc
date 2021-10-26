@@ -1,0 +1,417 @@
+###################################################
+# Eggd MultiQC Configuration File for WES
+###################################################
+
+# This file can be saved either in the MultiQC installation
+# directory, or as ~/.multiqc_config.yaml
+
+# Configuration settings are taken from the following locations, in order:
+# - Hardcoded in MultiQC (multiqc/utils/config.py)
+# - <installation_dir>/multiqc_config.yaml
+# - ~/.multiqc_config.yaml
+# - Command line options
+
+# Note that all of the values below are set to the MultiQC defaults.
+# It's recommended that you delete any that you don't need.
+
+#################################################################
+
+# Title to use for the report.
+title: East GLH MultiQC Report
+subtitle: Twist WES     # Grey text below title
+# intro_text: null      # Set to False to remove, or your own text
+
+# # Add generic information to the top of reports
+# report_header_info:
+#     - Example Config:: 'This is arbitrary'
+#     - Another field:: 'Loaded from <code>multiqc_config_example.yaml</code>'
+#     - Something different:: 'You can put any key-value pairs here'
+#     - Want to know more?: 'See the <a href="http://multiqc.info/docs" target="_blank">MultiQC docs</a>'
+# # Specify a custom logo to add to reports (uncomment to use)
+# custom_logo: 'link to egglogo.png'         # '/path/to/logo.png'
+# custom_logo_url: 'https://cuhbioinformatics.atlassian.net/servicedesk/customer/portal/3'     # 'https://www.example.com'
+# custom_logo_title: 'Bioinformatics Help Desk'   # 'Our Institute Name'
+
+# Default output filenames
+output_fn_name: multiqc_report.html
+data_dir_name: multiqc_data
+
+# Prepend sample names with their directory. Useful if analysing the
+# sample samples with different parameters.
+prepend_dirs: False
+# Whether to create the parsed data directory in addition to the report
+make_data_dir: True
+
+# Cleaning options for sample names. Typically, sample names are detected
+# from an input filename. If any of these strings are found, they and any
+# text to their right will be discarded.
+# For example - file1.fq.gz_trimmed.bam_deduplicated_fastqc.zip
+# would be cleaned to 'file1'
+# Two options here - fn_clean_exts will replace the defaults,
+# extra_fn_clean_exts will append to the defaults
+extra_fn_clean_exts:
+    - type: remove
+      pattern: '_001'      
+    - type: remove
+      pattern: '.markdup'
+    - type: remove
+      pattern: '_markdup' 
+    - type: remove
+      pattern: '.realigned'
+    - type: remove
+      pattern: '_metrics'
+    - type: remove
+      pattern: '.Duplication_metrics'
+    - type: remove
+      pattern: '.Duplication'
+    - type: remove
+      pattern: '.duplication'
+    - type: remove
+      pattern: '.AlignmentStat'
+    - type: remove
+      pattern: '.GCBias'
+    - type: remove
+      pattern: '.InsertSize'
+    - type: remove
+      pattern: '.MeanQualityByCycle_metrics'
+    - type: remove
+      pattern: '.QualDistribution_metrics'
+
+# Ignore files larger than this when searcing for logs (bytes)
+log_filesize_limit: 5000000000
+# MultiQC skips a couple of debug messages when searching files as the
+# log can get very verbose otherwise. Re-enable here to help debugging.
+report_readerrors: False
+report_imgskips: False
+# Opt-out of remotely checking that you're running the latest version
+no_version_check: False
+
+# How to plot graphs. Different templates can override these settings, but
+# the default template can use interactive plots (Javascript using HighCharts)
+# or flat plots (images, using MatPlotLib). With interactive plots, the report
+# can prevent automatically rendering all graphs if there are lots of samples
+# to prevent the browser being locked up when the report opens.
+plots_force_flat: False          # Try to use only flat image graphs
+plots_force_interactive: False   # Try to use only interactive javascript graphs
+plots_flat_numseries: 200        # If neither of the above, use flat if > this number of datasets
+num_datasets_plot_limit: 100      # If interactive, don't plot on load if > this number of datasets
+max_table_rows: 500              # Swap tables for a beeswarm plot above this
+
+# Overwrite module order displayed in report.
+# See multiqc/utils/config_defaults.yaml for the defaults.
+module_order:
+    - happy:
+        module_tag:
+            - DNA
+    - 'custom_content'
+    - verifybamid:
+        module_tag:
+            - DNA
+    - picard:
+        module_tag:
+            - DNA
+    - sentieon:
+        module_tag:
+            - DNA
+    - samtools:
+        module_tag:
+            - DNA
+    - fastqc:
+        module_tag:
+            - DNA
+    - bcl2fastq:
+        module_tag:
+            - DNA
+
+# Overwrite the defaults of which table columns are visible
+# in the General Statistics table
+table_columns_visible:
+    bcl2fastq: False
+    FastQC: False
+    Picard:
+        FOLD_ENRICHMENT: False
+    verifyBAMID:
+        CHIPMIX: False
+
+# Specify order in which table columns are visible in General Statistics
+table_columns_placement:
+    general_stats_table:
+        mapped_passed: 950
+        FREEMIX: 960
+        PCT_TARGET_BASES_20X: 970
+        percent_duplicates: 980
+        PCT_PF_READS_ALIGNED: 990
+        summed_median: 1000
+
+# Set picard configs: TARGET BASES COVERAGE
+picard_config:
+    general_stats_target_coverage: # should be referred to as 'mqc-generalstats-picard-PCT_TARGET_BASES_20X'
+        - 20                           # for conditional table formatting
+
+table_cond_formatting_colours:
+    - blue: '#337ab7'
+    - lbue: '#5bc0de'
+    - pass: '#5cb85c'
+    - warn: '#f0ad4e'
+    - fail: '#d9534f'
+
+# Set conditional formatting rules for general stats
+table_cond_formatting_rules:
+    # Columns in the General Statistics table
+    mqc-generalstats-picard-PCT_TARGET_BASES_20X: # Percentage of target bases at 20x    
+        pass:                                     # number in name depends on what is set above
+            - lt: 101
+        warn:
+            - eq: 95.0
+            - lt: 95.0
+        fail:
+            - eq: 90.0
+            - lt: 90.0
+    mqc-generalstats-verifybamid-FREEMIX: #verifyBamId Contaminntion column in General Stats
+        pass:
+            - lt: 2
+        warn:
+            - eq: 2
+            - gt: 2
+        fail:
+            - eq: 5
+            - gt: 5
+    # Columns in tables from other modules
+    mean_het_ratio: # vcf_qc mean het ratio column
+        pass:
+            - gt: 0
+        fail:
+            - lt: 0.45
+            - gt: 0.50
+    FOLD_80_BASE_PENALTY: # Picard HSMetrics fold 80 base penalty column
+        pass:
+            - lt: 1.60
+        warn:
+            - eq: 1.60
+            - gt: 1.60
+    FREEMIX: #verifyBamId Contamination column in verifybamid
+        pass:
+            - lt: 2
+        warn:
+            - eq: 2
+            - gt: 2
+        fail:
+            - eq: 5
+            - gt: 5
+    METRIC_Recall_indel: # Happy indel Recall outputs
+        pass:
+            - gt: 0.850
+            - eq: 0.850
+        warn:
+            - lt: 0.850
+        fail:
+            - lt: 0.840
+    METRIC_Precision_indel: # Happy indel Precision outputs
+        pass:
+            - gt: 0.620
+            - eq: 0.620
+        warn:
+            - lt: 0.620
+        # fail:
+        #     - lt: 0.600
+    METRIC_Recall_snp:  # Happy snp Recall outputs
+        pass:
+            - gt: 0.999
+            - eq: 0.99
+        warn:
+            - lt: 0.999
+        fail:
+            - lt: 0.990
+    METRIC_Precision_snp:  # Happy snp Precision outputs
+        pass:
+            - gt: 0.995
+            - eq: 0.995
+        warn:
+            - lt: 0.995
+        # fail:
+        #     - lt: 0.990
+    Match_Sexes:  # Somalier Matching Sex column
+        pass:
+            - s_eq: 'true'
+        warn:
+            - s_eq: 'NA'
+        fail:
+            - s_eq: 'fail'
+
+    # all_columns:
+    #     pass:
+    #         - s_eq: 'pass'
+    #         - s_eq: 'true'
+    #     warn:
+    #         - s_eq: 'warn'
+    #         - s_eq: 'unknown'
+    #         - s_eq: 'none'
+    #     fail:
+    #         - s_eq: 'fail'
+    #         - s_eq: 'false'
+
+# Add code to include data from custom QC data files
+custom_data:
+    vcf_qc_files:
+        file_format: 'tsv'
+        section_name: 'Het-hom analysis'
+        description: 'This plot comes from vcf_qc files'
+        plot_type: 'table'
+        pconfig:
+            id: 'het-hom_table'
+            table_title: 'Het-hom'
+            'col1_header': 'Sample'
+            'col2_header': 'mean het ratio'
+            'col3_header': 'mean homo ratio'
+            'col4_header': 'het:homo ratio'
+            'col5_header': 'X homo:het ratio'
+            # 'col6_header': 'gender'
+        headers:
+            mean het ratio:
+                format:  '{:,.2f}'
+            mean homo ratio:
+                format:  '{:,.2f}'
+            het:homo ratio:
+                format:  '{:,.2f}'
+            X homo:het ratio:
+                format:  '{:,.2f}'
+            # gender:
+            #     title:  'Inferred sex'
+    somalier_files:
+        file_format: 'tsv'
+        section_name: 'Somalier sex check'
+        description: 'Checking whether predicted sex is same as reported'
+        plot_type: 'table'
+        pconfig:
+            id: 'somalier_table'
+            table_title: 'Sex check'
+            'col1_header': 'sample_id'
+            'col7_header': 'original_pedigree_sex'
+            'col19_header': 'X_depth_mean'
+            'col20_header': 'X_n'
+            'col21_header': 'X_hom_ref'
+            'col22_header': 'X_het'
+            'col23_header': 'X_hom_alt'
+            'col24_header': 'Y_depth_mean'
+            'col25_header': 'Y_n'
+            'col26_header': 'Predicted_Sex'
+            'col27_header': 'Match_Sexes'
+        headers:
+            sample_id:
+                title: 'Sample ID'
+            original_pedigree_sex:
+                title: 'Reported sex'
+                description: 'Expected sex reported from filename'
+            X_depth_mean:
+                title: 'X_depth_mean'
+                description: 'Mean depth on X chromosome'
+            X_n:
+                title: 'X total'
+                description: 'Total variant calls on X chromosome'
+                format:  '{:,.0f}'
+            X_hom_ref:
+                title: 'X_hom_ref'
+                description: 'Homozygous ref variant calls on X chromosome'
+                format:  '{:,.0f}'
+            X_het:
+                title: 'X_het'
+                description: 'Heterozygosity variant calls on X chromosome'
+                format:  '{:,.0f}'
+            X_hom_alt:
+                title: 'X_hom_alt'
+                description: 'Homozygous alt variant calls on X chromosome'
+                format:  '{:,.0f}'
+            Y_depth_mean:
+                title: 'Y_depth_mean'
+                description: 'Mean depth on Y chromosome'
+            Y_n:
+                title: 'Y_n'
+                description: 'Total variant calls on Y chromosome'
+                format:  '{:,.0f}'
+            Predicted_Sex:
+                title: 'Predicted sex'
+                description: 'Predicted sex based on thresholds on X_het'
+            Match_Sexes:
+                title: 'Matching Sex'
+                description: 'Whether reported and predicted sex of sample match'
+
+# Overwrite module filename search patterns. See multiqc/utils/search_patterns.yaml
+# for the defaults. Remove a default by setting it to null.
+sp:
+    bcl2fastq:
+        fn: 'Stats.json'
+    fastqc/data:
+        fn: '*.stats-fastqc.txt'
+    sentieon/alignment_metrics:
+        fn: '*.AlignmentStat_metrics.txt'
+        shared: true
+    sentieon/markdups:
+        fn: '*.Duplication_metrics.txt'
+        shared: true
+    sentieon/gcbias:
+        fn: '*.GCBias_metrics.txt'
+        shared: true
+    sentieon/insertsize:
+        fn: '*.InsertSize_metrics.txt'
+        shared: true
+    picard/hsmetrics:
+        fn: '*.hsmetrics.tsv'
+        shared: true
+    picard/pcr_metrics:
+        fn: '*.pertarget_coverage.tsv'
+        shared: true
+    picard/quality_by_cycle:
+        fn: '*.MeanQualityByCycle_metrics.txt'
+        shared: true
+    picard/quality_score_distribution:
+        fn: '*.QualDistribution_metrics.txt'
+        shared: true
+    verifybamid/selfsm:
+        fn: '*.selfSM'
+    samtools/flagstat:
+        fn: '*.flagstat'
+        contents: 'in total (QC-passed reads + QC-failed reads)'
+        shared: true
+    happy:
+        fn: "*.summary.csv"
+        contents: "Type,Filter,TRUTH"
+    vcf_qc_files:
+        fn: '*.vcf.QC'
+    somalier_files:
+        fn: '*_somalier.samples.tsv'
+
+# Remove plots from HTML report
+# remove_sections:
+
+# Remove module sections from HTML report
+exclude_modules:
+    - somalier
+
+# Specify location and file extensions of QC metrics to be downloaded
+# to the workstation by the app:
+dx_sp:
+    primary:
+        fastqc:
+            - '*.stats-fastqc.txt'
+        sentieon/sample:
+            - '*.AlignmentStat_metrics.txt'
+            - '*.Duplication_metrics.txt'
+            - '*.GCBias_metrics.txt'
+            - '*.InsertSize_metrics.txt'
+            # - '*.MeanQualityByCycle_metrics.txt'
+            # - '*.QualDistribution_metrics.txt'
+        picard/QC:
+            - '*.hsmetrics.tsv'
+            - '*.pertarget_coverage.tsv'
+        verifybamid/QC:
+            - '*.selfSM'
+            # - '*.depthSM'
+        samtools:
+            - '*.flagstat'
+        vcf_qc:
+            - '*.vcf.QC'
+    secondary:
+        somalier_relate2multiqc:
+            - '*_somalier.samples.tsv'
+        vcfeval_hap.py:
+            - "*.summary.csv"
