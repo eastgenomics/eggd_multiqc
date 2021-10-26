@@ -6,9 +6,9 @@ set -e -x -o pipefail
 
 main() {
 
-    sudo apt-get -q install parallel -y
-    sudo apt-get -q install jq -y
-    python3 -m pip install -qr requirements.txt
+    sudo apt-get install parallel -y
+    sudo apt-get install jq -y
+    python3 -m pip install -r requirements.txt
 
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o config.yaml
@@ -82,5 +82,4 @@ main() {
     mv ${outdir}/$report_name.html ${report_outdir}
     # Upload results
     dx-upload-all-outputs --parallel
-
 }
