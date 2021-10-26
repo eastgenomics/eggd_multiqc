@@ -238,7 +238,7 @@ custom_data:
 sp:
     fastqc/data:
         fn: '*.stats-fastqc.txt'
-    sentieon/alignment_metrics:
+    picard/alignment_metrics:
         fn: '*.alignment_summary_metrics'
         shared: true
     picard/insertsize:
@@ -247,18 +247,24 @@ sp:
     picard/hsmetrics:
         fn: '*.hsmetrics.tsv'
         shared: true
-    picard/gcbias:
-        fn: '*.gc_bias.detail_metrics'
+    picard/basedistributionbycycle:
+        fn: '*.base_distribution_by_cycle_metrics'
+        contents: "BaseDistributionByCycleMetrics"
         shared: true
+    # picard/gcbias:
+    #     fn: '*.gc_bias.detail_metrics'
+    #     fn: '*.gc_bias.summary_metrics'
+    #     shared: true
     picard/pcr_metrics:
-        fn: '*.pertarget_coverage.tsv'
+        contents: "TargetedPcrMetrics"
+    #     fn: '*.pertarget_coverage.tsv'
         shared: true
-    picard/quality_by_cycle:
-        fn: '*.quality_by_cycle_metrics'
-        shared: true
-    picard/quality_score_distribution:
-        fn: '*.quality_distribution_metrics'
-        shared: true
+    # picard/quality_by_cycle:
+    #     fn: '*.quality_by_cycle_metrics'
+    #     shared: true
+    # picard/quality_score_distribution:
+    #     fn: '*.quality_distribution_metrics'
+    #     shared: true
     verifybamid/selfsm:
         fn: '*.selfSM'
     samtools/flagstat:
@@ -272,11 +278,12 @@ sp:
 # Remove plots from HTML report
 remove_sections:
     - picard_hsmetrics_target_bases # Target Region Coverage plot
+    - picard_alignment_readlength_plot # Mean Read Length plot
     - fastqc_per_base_sequence_content # -  Per Base Sequence Content plot
 
 exclude_modules:
-  - sentieon
-  - bcl2fastq
+    - sentieon
+    - bcl2fastq
 
 # Specify location and file extensions of QC metrics to be downloaded
 # to the workstation by the app:
@@ -286,12 +293,12 @@ dx_sp:
             - '*.stats-fastqc.txt'
         picard/QC:
             - '*.alignment_summary_metrics'
-            - '*.hsmetrics.tsv'
+            - '*.base_distribution_by_cycle_metrics'
             - '*.gc_bias.detail_metrics'
+            - '*.hsmetrics.tsv'
             - '*.insert_size_metrics'
-            - '*.pertarget_coverage.tsv'
-            # - '*.quality_by_cycle_metrics'
-            # - '*.quality_distribution_metrics'
+            - '*.quality_yield_metrics'
+            - '*.targetPCRmetrics.txt'
         verifybamid/QC:
             - '*.selfSM'
             # - '*.depthSM'
