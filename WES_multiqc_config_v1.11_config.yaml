@@ -345,14 +345,14 @@ sp:
     sentieon/alignment_metrics:
         fn: '*.AlignmentStat_metrics.txt'
         shared: true
-    sentieon/markdups:
-        fn: '*.Duplication_metrics.txt'
-        shared: true
     sentieon/gcbias:
         fn: '*.GCBias_metrics.txt'
         shared: true
     sentieon/insertsize:
         fn: '*.InsertSize_metrics.txt'
+        shared: true
+    picard/markdups:
+        fn: '*.Duplication_metrics.txt'
         shared: true
     picard/hsmetrics:
         fn: '*.hsmetrics.tsv'
