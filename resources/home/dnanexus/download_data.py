@@ -28,7 +28,7 @@ try:
     for module in config["secondary"]:
         # folder = module.split('/')[0]
         path = workflowdir+'/'+multi
-        for fname in config["multi"][module]:
+        for fname in config["secondary"][module]:
             os.system("dx find data --brief --path {} --name {} | parallel -I% 'dx download % -o ./inp/'".format(path, fname))
             print("downloaded {} files".format(fname))
 except:
