@@ -1,4 +1,4 @@
-# Python3.6
+#/usr/bin/python3
 
 import os
 import argparse
@@ -19,9 +19,8 @@ for module in config["primary"]:
     # folder = module.split('/')[0]
     # path = workflowdir+'/*'+folder+'*'
     for fname in config["primary"][module]:
-        # dx ls ${workflowdir}/"$folder" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
-        # dx find data --brief --path {} --name {} | parallel -I% 'dx download % -o ./inp/
-        os.system("dx find data --brief --path {} --name {} | parallel -I% 'dx download % -o ./inp/'".format(workflowdir, fname))
+        os.system("dx find data --brief --path {} --name {} | \
+            parallel -I% 'dx download % -o ./inp/'".format(workflowdir, fname))
         print("downloaded {} files".format(fname))
 
 try:
@@ -29,7 +28,8 @@ try:
         # folder = module.split('/')[0]
         path = workflowdir+'/'+multi
         for fname in config["secondary"][module]:
-            os.system("dx find data --brief --path {} --name {} | parallel -I% 'dx download % -o ./inp/'".format(path, fname))
+            os.system("dx find data --brief --path {} --name {} | \
+                parallel -I% 'dx download % -o ./inp/'".format(path, fname))
             print("downloaded {} files".format(fname))
 except:
     pass
