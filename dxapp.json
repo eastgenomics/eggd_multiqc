@@ -8,6 +8,19 @@
   },
   "inputSpec": [
     {
+      "name": "MultiQC_docker",
+      "label": "Docker image tar.gz of the MultiQC tool",
+      "class": "file",
+      "optional": false,
+      "patterns": [ "*.tar", "*.tar.gz"],
+      "suggestions": [
+        {
+          "project": "project-FpG6k2Q4g59bZJ0z15XzByFY",
+          "path": "/"
+        }
+      ]
+    },
+    {
       "name": "eggd_multiqc_config_file",
       "label": "MultiQC config file",
       "help": "must have an 'sp' key that specify all modules to be displayed in the report",
@@ -33,7 +46,7 @@
     {
       "name": "ss_for_multiqc",
       "label": "Output directory name of the main workflow, eg 'dias_v1.0.0-200430-1' OR a specific folder within the project",
-      "help": "Name of the directory that holds the QC data: single sample/main workflow OR absolut path to a single folder. Examples: 'dias_single_v#-TWE_v#-YYMMDD-1' or 'uranus_YYMMDD_1' or '/foo/bar/all_QC_files/'",
+      "help": "Name of the directory that holds the QC data: single sample/main workflow OR absolute path to a single folder. Examples: 'dias_single_v#-TWE_v#-YYMMDD-1' or 'uranus_YYMMDD_1' or '/foo/bar/all_QC_files/'",
       "optional": false,
       "class": "string"
     },

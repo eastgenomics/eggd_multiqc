@@ -6,9 +6,12 @@ set -e -x -o pipefail
 
 main() {
 
-    sudo apt-get install parallel -y
-    sudo apt-get install jq -y
-    python3 -m pip install -r requirements.txt
+    echo "Installing packages"
+    sudo dpkg -i parallel*.deb
+    sudo dpkg -i jq*.deb
+    cd packages
+    pip install -q pytz-* python_dateutil-* numpy-* pandas-* jq--* yq-*
+    cd ..
 
     # Download the config file
     dx download "$eggd_multiqc_config_file" -o config.yaml
@@ -18,12 +21,12 @@ main() {
     ss=$(echo $ss_for_multiqc | xargs)           # main workflow name or absolut path to single folder
 
     # Make directory to pull in all QC files
-    mkdir inp
+    mkdir inputs
 
     case $single_folder in
         (true)       # development
             echo "Downloading all files from the given project:/path/to/folder"
-            dx download $project:/$ss/* -o ./inp/
+            dx download $project:/$ss/* -o ./inputs/
             # substitute '\' with '-' in the single folder path
             renamed=${ss//\//-}
             ss=$renamed
@@ -44,7 +47,7 @@ main() {
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
                 echo "Downloading Stats.json from the given project"
-                dx download $stats -o ./inp/
+                dx download $stats -o ./inputs/
             fi
             ;;
     esac
@@ -54,8 +57,8 @@ main() {
         (true)
             mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
             # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
-            cp inp/*hsmetrics.tsv calc_cov
-            # Run the Python script, returns output into inp/
+            cp inputs/*hsmetrics.tsv calc_cov
+            # Run the Python script, returns output into inputs/
             python3 calc_custom_coverage.py calc_cov
             ;;
     esac
@@ -65,16 +68,15 @@ main() {
     # Remove '_clinicalgenetics' from the end of the project name, if applicable
     if [[ "$project" == *_clinicalgenetics ]]; then project=${project%_clinicalgenetics}; fi
 
-    # Rename inp folder to a more meaningful one for downstream processing
-    mv inp "$(echo $project)-$(echo $ss)"
+    # Rename inputs folder to a more meaningful one for downstream processing
+    mv inputs "${project}-${ss}"
     # Create the output folders that will be recognised by the job upon completion
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
-    report_name="$(echo $project)-$(echo $ss)-multiqc"
-
+    report_name="${project}-${ss}-multiqc"
     # Load the docker image and then run it
     docker load -i multiqc_v1.11.tar.gz
-    docker run -v /home/dnanexus:/egg ewels/multiqc:v1.11 /egg/"$(echo $project)-$(echo $ss)" -c /egg/config.yaml -n /egg/${outdir}/$report_name.html
+    docker run -v /home/dnanexus:/egg ewels/multiqc:v1.11 /egg/"${project}-${ss}" -c /egg/config.yaml -n /egg/${outdir}/$report_name.html
 
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$eggd_multiqc_config_file_name
