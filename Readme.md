@@ -21,7 +21,7 @@ Option 1 for production run on workflow output:
 Option 2 for testing and development:
 * set the single_folder input option to TRUE and provide a
 * project name and 
-* the absolut path to a specific folder in the project with all QC files
+* the absolute path to a specific folder in the project with all QC files
 For example, if you want files from project:/folder/subfolder/data_files, you need to input 'folder/subfolder' into the field
 This will download all files from only this folder and will break if there are further subfolders inside!
 
