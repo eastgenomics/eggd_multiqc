@@ -1,4 +1,4 @@
-#/usr/bin/python3
+# /usr/bin/python3
 
 import os
 import sys
@@ -7,7 +7,10 @@ import pandas as pd
 # This script is pointed to a folder in a fixed location /calc_cov
 folder = sys.argv[1]
 # %coverage is calculated for the below depths
-depths = [200,250,300,500,1000]
+depths = sys.argv[2]
+print(depths)
+print(type(depths))
+depths = [200, 250, 300, 500, 1000]
 
 # Go through each file in the folder
 # parse the files' section after ##HISTOGRAM into a dataframe
@@ -19,12 +22,19 @@ with open("inp/custom_coverage.csv", 'w') as f:
     f.write(header + "\n")
 
     for file in os.listdir(folder):
-        hs_data = pd.read_csv(folder+"/"+file, sep='\t', header=8,
-            usecols=["coverage_or_base_quality", "high_quality_coverage_count"])
+        hs_metrics_file = "/".join([folder, file])
+        hs_data = pd.read_csv(
+            hs_metrics_file, sep='\t', header=8, usecols=[
+                "coverage_or_base_quality", "high_quality_coverage_count"
+            ]
+        )
         total = sum(hs_data['high_quality_coverage_count'])
 
         # Calculate the coverage at each depth
-        calc_cov = [sum(hs_data.loc[hs_data['coverage_or_base_quality'] >= cov]["high_quality_coverage_count"]) for cov in depths]
+        calc_cov = [
+            sum(hs_data.loc[
+                hs_data['coverage_or_base_quality'] >= cov][
+                    "high_quality_coverage_count"]) for cov in depths]
 
         # Calculate the %coverage at each depth
         p_cov = [cov/total*100 for cov in calc_cov]
