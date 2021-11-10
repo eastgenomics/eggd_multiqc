@@ -7,7 +7,7 @@ Docker images are available from [here](https://hub.docker.com/r/ewels/multiqc/)
 ## What does this app do?
 This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" field in the config.yaml. Then runs the MultiQC tool to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/tree/v1.11/multiqc/modules).
 
-### It is essential to use a config file that has a "dx_sp" section
+It is essential to use a config file that has a "dx_sp" section with "primary" for file extenstions in app/outputs of the primary workflow and "secondary" for file extenstions in app/outputs of the secondary workflow.
 
 ## What inputs are required to run this app?
 * `multiqc_docker`: Docker image of the MultiQC tool (can be found in 001_Reference:/assets/MultiQC)
