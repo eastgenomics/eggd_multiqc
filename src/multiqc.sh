@@ -38,14 +38,33 @@ main() {
         (false)      # production
             echo "Download all QC metrics from the folders specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
-            workflowdir="$project:/output/$primary"
-            for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do dx find data --brief --path "$workflowdir" --name "$pattern" | xargs -P4 -n1 -I{} dx download {} -o ./inputs/; done
+
+            # Check that an /output/ folder exists in the root of the project
+            output_dir=$(dx ls --folders --brief  "$project:/output/")
+            if [[ $output_dir ]]; then
+                workflowdir="$project:/output/$primary"
+            else
+                workflowdir="$project:/$primary"
+            fi
+
+            # get all file patterns of files to download from primary workflow output folder,
+            # then find and download from project in given folder
+            for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do 
+                dx find data --brief --path "$workflowdir" --name "$pattern" | \
+                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+            done
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
-                for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | xargs -P4 -n1 -I{} dx download {} -o ./inputs/; done
+                
+                # get all file patterns of files to download from secondary workflow output folder,
+                # then find and download from project in given folder
+                for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
+                    dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
+                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                done
             fi
-            
+
             # Download Stats.json from the project
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
@@ -72,10 +91,10 @@ main() {
             ;;
     esac
 
-    # Remove 002_ from the beginning of the project name, if applicable
-    if [[ "$project" == 002_* ]]; then project=${project#"002_"}; fi
-    # Remove '_clinicalgenetics' from the end of the project name, if applicable
-    if [[ "$project" == *_clinicalgenetics ]]; then project=${project%"_clinicalgenetics"}; fi
+    # Remove 002_ from the beginning of the project name
+    project=${project#"002_"}
+    # Remove '_clinicalgenetics' from the end of the project name
+    project=${project%"_clinicalgenetics"}
     # Rename inputs folder to a more meaningful one to be displayed in the report
     # Set the report name to include the project and primary workflow
     folder_name="${project}-${primary}"
