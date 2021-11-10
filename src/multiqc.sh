@@ -44,9 +44,8 @@ main() {
             if [[ ! -z ${secondary_workflow_output} ]]; then
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | xargs -P4 -n1 -I{} dx download {} -o ./inputs/; done
-                # python3 download_data.py $workflowdir --multi $secondary
-                echo "Experimenting begins"
-
+            fi
+            
             # Download Stats.json from the project
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
