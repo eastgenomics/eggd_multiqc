@@ -7,12 +7,10 @@ set -e -x -o pipefail
 main() {
 
     echo "Installing packages"
-    sudo dpkg -i sysstat*.deb
-    sudo dpkg -i parallel*.deb
-    # sudo dpkg -i libonig2*.deb
-    sudo dpkg -i jq*.deb
+    sudo dpkg -s jq | grep -i version
+
     cd packages
-    pip install -q pytz-* python_dateutil-* numpy-* pandas-* jq--* yq-*
+    pip install -q jq-* yq-*
     cd ..
 
     echo "Downloading Docker image and config file"
@@ -41,14 +39,13 @@ main() {
             echo "Download all QC metrics from the folders specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
             workflowdir="$project:/output/$primary"
+            for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do dx find data --brief --path "$workflowdir" --name "$pattern" | xargs -P4 -n1 -I{} dx download {} -o ./inputs/; done
 
-            # Option 2: go with the Python script
             if [[ ! -z ${secondary_workflow_output} ]]; then
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
-                python3 download_data.py $workflowdir --multi $secondary
-            else
-                python3 download_data.py $workflowdir
-            fi
+                for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | xargs -P4 -n1 -I{} dx download {} -o ./inputs/; done
+                # python3 download_data.py $workflowdir --multi $secondary
+                echo "Experimenting begins"
 
             # Download Stats.json from the project
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
@@ -61,6 +58,11 @@ main() {
     # If the option was selected to calculate additional coverage:
     case $calc_custom_coverage in
         (true)
+            echo "Installing required Python packages"
+            cd packages
+            pip install -q pytz-* python_dateutil-* numpy-* pandas-*
+            cd ..
+
             echo "Calculating coverage at custom depths"
             mkdir hsmetrics_files  #stores HSmetrics.tsv files to calculate custom coverage
             # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
@@ -94,7 +96,7 @@ main() {
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$multiqc_config_file_name
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/$report_name.html ${report_outdir}
+    mv ${outdir}/$report_name ${report_outdir}
     # Upload results
     dx-upload-all-outputs --parallel
 }

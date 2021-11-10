@@ -94,9 +94,9 @@
         "hours": 2
       }
     },
-    "version": "1",
+    "version": "0",
     "interpreter": "bash",
-    "release": "16.04",
+    "release": "20.04",
     "distribution": "Ubuntu",
     "file": "src/multiqc.sh"
   },
