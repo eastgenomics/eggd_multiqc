@@ -39,7 +39,7 @@ The following outputs are placed in the DNAnexus project in the specified output
 * original config_file.yaml that was used to generate the report
 
 ## How does this app work?
-1. The app downloads files within the $project_for_multiQC:/output/$ss_for_multiQC/QCapp directories of the project, where 'QCapp' and filename extensions are specified in the config file.
+1. The app downloads files within the $project_for_multiQC:/output/$primary_workflow_output/QCapp directories of the project, where 'QCapp' and filename extensions are specified in the config file.
 2. The app runs the dockerised MultiQC tool with the config file provided.
 3. MultiQC parses all recognised files and displays them in the html report.
 4. The MultiQC outputs are uploaded to DNAnexus.
