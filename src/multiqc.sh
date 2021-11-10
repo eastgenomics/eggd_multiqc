@@ -1,109 +1,120 @@
 #!/bin/bash
-# multiqc 1.1.2
+# multiqc 1.2.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
 main() {
 
-    sudo apt-get install parallel -y
+    echo "Installing packages"
+    sudo dpkg -s jq | grep -i version
+
+    cd packages
+    pip install -q jq-* yq-*
+    cd ..
+
+    echo "Downloading Docker image and config file"
+    # Download the MultiQC docker image
+    dx download "$multiqc_docker" -o MultiQC.tar.gz
+
     # Download the config file
-    dx download "$eggd_multiqc_config_file" -o eggd_multiqc_config_file
+    dx download "$multiqc_config_file" -o config.yaml
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
-    export project=$(echo $project_for_multiqc | xargs) # project name
-    ss=$(echo $ss_for_multiqc | xargs)           # single sample workflow or single folder name/path
+    project=$(echo $project_for_multiqc | xargs) # project name
+    primary=$(echo $primary_workflow_output | xargs)  # primary workflow name or absolute path to single folder
 
     # Make directory to pull in all QC files
-    mkdir inp   # stores files to be used as input for MultiQC
-
-    # Get all the QC files (stored in a single folder project:/single/*
-                             # OR in project:/output/single/app folders
-                             #   and project:/output/single/multi/happy
-    # and download into 'inp'
+    mkdir inputs
 
     case $single_folder in
         (true)       # development
-            echo "Downloading all files from the given project:/folder"
-            dx download $project:/$ss/* -o ./inp/
+            echo "Downloading all files from the given project:/path/to/folder"
+            dx download $project:/$primary/* -o ./inputs/
             # substitute '\' with '-' in the single folder path
-            renamed=${ss//\//-}
-            ss=$renamed
+            renamed=${primary//\//-}
+            primary=$renamed
             ;;
         (false)      # production
-            echo "Downloading all files from project:/output/workflow/apps"
-            wfdir="$project:/output/$ss"
-            # Download stats.json from the project
+            echo "Download all QC metrics from the folders specified in the config file"
+            yq '.["dx_sp"]' config.yaml > config.json
+
+            # Check that an /output/ folder exists in the root of the project
+            output_dir=$(dx ls --folders --brief  "$project:/output/")
+            if [[ $output_dir ]]; then
+                workflowdir="$project:/output/$primary"
+            else
+                workflowdir="$project:/$primary"
+            fi
+
+            # get all file patterns of files to download from primary workflow output folder,
+            # then find and download from project in given folder
+            for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do 
+                dx find data --brief --path "$workflowdir" --name "$pattern" | \
+                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+            done
+
+            if [[ ! -z ${secondary_workflow_output} ]]; then
+                secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
+                
+                # get all file patterns of files to download from secondary workflow output folder,
+                # then find and download from project in given folder
+                for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
+                    dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
+                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                done
+            fi
+
+            # Download Stats.json from the project
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
-                echo "Downloading Stats.json from the given project"
-                dx download $stats -o ./inp/
-            fi
-            # Download all reports from the single_sample workflow output folders
-            for f in $(dx ls ${wfdir} --folders); do
-                if [[ $f == *fastqc*/ ]] || [[ $f == *samtools*/ ]] || [[ $f == *vcf_qc*/ ]]; then
-                    dx download ${wfdir}/"$f"/* -o ./inp/
-                elif [[ $f == *picard*/ ]] || [[ $f == *verifybamid*/ ]]; then
-                    dx download ${wfdir}/"$f"/QC/* -o ./inp/
-                elif [[ $f == *sentieon*/ ]]; then
-                    dx ls ${wfdir}/"$f" --folders --full | parallel -I% 'dx download $project:%/* -o ./inp/'
-                fi
-            done
-            # Download happy reports from the multi_sample workflow, if provided
-            if [[ ! -z ${ms_for_multiqc} ]]; then
-                ms=$(echo $ms_for_multiqc | xargs)       # multi sample workflow
-                for h in $(dx ls ${wfdir}/"$ms" --folders); do
-                    if [[ $h == *vcfeval*/ ]]; then
-                        echo "Downloading happy files from project:/output/sinlge/multi/happy"
-                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
-                    elif [[ $h == *relate2multiqc*/ ]]; then
-                        echo "Downloading somalier files from project:/output/sinlge/multi/relate2multiqc"
-                        dx download ${wfdir}/"$ms"/"$h"/* -o ./inp/
-                    fi
-                done
+                dx download $stats -o ./inputs/
             fi
             ;;
     esac
 
     # If the option was selected to calculate additional coverage:
-    case $custom_coverage in
+    case $calc_custom_coverage in
         (true)
-            mkdir calc_cov  #stores HSmetrics.tsv files to calculate custom coverage
+            echo "Installing required Python packages"
+            cd packages
+            pip install -q pytz-* python_dateutil-* numpy-* pandas-*
+            cd ..
+
+            echo "Calculating coverage at custom depths"
+            mkdir hsmetrics_files  #stores HSmetrics.tsv files to calculate custom coverage
             # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
-            cp inp/*hsmetrics.tsv calc_cov
-            
-            # Add code that runs the Python script, returns the output file into inp/
-            pip install 'pandas==0.24.2'  # control which version of pandas is used
-            python3 calc_custom_coverage.py calc_cov
+            cp inputs/*hsmetrics.tsv hsmetrics_files
+            # Run the Python script, returns output into inputs/
+            echo "$depths"
+            python3 calc_custom_coverage.py hsmetrics_files "$depths"
             ;;
     esac
 
-    # Remove 002_ from the beginning of the project name, if applicable
-    if [[ "$project" == 002_* ]]; then
-        project=${project:4}
-    fi
-    # Remove '_clinicalgenetics' from the end of the project name, if applicable
-    if [[ "$project" == *_clinicalgenetics ]]; then
-        project=${project%_clinicalgenetics}
-    fi
+    # Remove 002_ from the beginning of the project name
+    project=${project#"002_"}
+    # Remove '_clinicalgenetics' from the end of the project name
+    project=${project%"_clinicalgenetics"}
+    # Rename inputs folder to a more meaningful one to be displayed in the report
+    # Set the report name to include the project and primary workflow
+    folder_name="${project}-${primary}"
+    mv inputs "$folder_name"
+    report_name="$folder_name-multiqc.html"
 
-    # Rename inp folder to a more meaningful one for downstream processing
-    mv inp "$(echo $project)-$(echo $ss)"
     # Create the output folders that will be recognised by the job upon completion
-    report_name="$(echo $project)-$(echo $ss)-multiqc"
-    outdir=out/multiqc_data_files && mkdir -p ${outdir}
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
+    outdir=out/multiqc_data_files && mkdir -p ${outdir}
 
+    echo "Running MultiQC on the downloaded QC metric files"
     # Load the docker image and then run it
-    docker load -i multiqc_egg.tar.gz
-    docker run -v /home/dnanexus:/egg sophie22/multiqc_egg:v1.0.0 /egg/"$(echo $project)-$(echo $ss)" -n /egg/${outdir}/$report_name.html -c /egg/eggd_multiqc_config_file
+    docker load -i MultiQC.tar.gz
+    docker run -v /home/dnanexus:/egg ewels/multiqc:v1.11 /egg/"$folder_name" -c /egg/config.yaml -n /egg/${outdir}/$report_name
 
+    echo "Uploading the config file, html report and a folder of data files"
     # Move the config file to the multiqc data output folder. This was created by running multiqc
-    mv eggd_multiqc_config_file ${outdir}/$report_data/
+    mv config.yaml ${outdir}/$multiqc_config_file_name
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/$report_name.html ${report_outdir}
-
+    mv ${outdir}/$report_name ${report_outdir}
     # Upload results
     dx-upload-all-outputs --parallel
-
 }
