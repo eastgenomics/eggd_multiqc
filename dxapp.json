@@ -13,6 +13,9 @@
       "optional": false,
       "class": "file",
       "patterns": [ "*.tar", "*.tar.gz"],
+      "default": {
+        "$dnanexus_link": "file-G61JxF84g59YVK4G43FzGzGp"
+      },
       "suggestions": [
         {
           "project": "project-FpG6k2Q4g59bZJ0z15XzByFY",
