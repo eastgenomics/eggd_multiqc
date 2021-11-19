@@ -1,10 +1,12 @@
 {
-  "name": "MultiQC_v1.2.0",
-  "title": "MultiQC_v1.2.0",
-  "summary": "MultiQC - Generates a run-wide visualisation of QC metrics",
+  "name": "eggd_MultiQC",
+  "title": "eggd_MultiQC",
+  "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
+  "version":"2.0.0",
+  "openSource": true,
   "properties": {
-    "githubRelease": "v1.2.0"
+    "githubRelease": "v2.0.0"
   },
   "inputSpec": [
     {
@@ -103,6 +105,13 @@
     "distribution": "Ubuntu",
     "file": "src/multiqc.sh"
   },
+  "developers":[
+    "user-sophier",
+    "org-emee_1"
+  ],
+  "authorizedUsers": [
+    "org-emee_1"
+  ],
   "access": {
     "allProjects":"VIEW",
     "network": [
@@ -119,4 +128,3 @@
     }
   }
 }
-
