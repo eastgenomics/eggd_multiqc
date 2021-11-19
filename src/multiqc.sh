@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 1.2.0
+# multiqc 2.0.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -7,6 +7,8 @@ set -e -x -o pipefail
 main() {
 
     echo "Installing packages"
+    sudo dpkg -i sysstat*.deb
+    sudo dpkg -i parallel*.deb
     sudo dpkg -s jq | grep -i version
 
     cd packages
