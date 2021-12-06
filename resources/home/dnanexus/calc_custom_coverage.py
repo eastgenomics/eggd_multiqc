@@ -63,6 +63,12 @@ for file in os.listdir(folder):
         # matching the DataFrame column name
         depth_key = str(depth)+"x"
         sample_info[depth_key] = pct_coverage
+
+    # Calculate usable unique bases on-target, reread in files as its on a different header/row
+    hs_data_on_target_calc = pd.read_csv(hs_metrics_file, sep='\t', header = 5, nrows=1)
+    Usable_unique_bases_on_target = (hs_data_on_target_calc.ON_TARGET_BASES / hs_data_on_target_calc.PF_UQ_BASES_ALIGNED) * 100
+    sample_info['% Usable unique bases on-target'] = float(Usable_unique_bases_on_target)
+
     custom_coverage = custom_coverage.append(sample_info, ignore_index=True)
 
 custom_coverage.to_csv("inputs/custom_coverage.csv",
