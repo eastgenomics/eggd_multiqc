@@ -115,7 +115,7 @@ main() {
     echo "Running MultiQC on the downloaded QC metric files"
     # Load the docker image and then run it
     docker load -i MultiQC.tar.gz
-    MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep "^ewels" | cut -d' ' -f2) 
+    MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep multiqc | cut -d' ' -f2)
     docker run -v /home/dnanexus:/egg $MultiQC_image /egg/"$folder_name" -c /egg/config.yaml -n /egg/${outdir}/$report_name
 
     echo "Uploading the config file, html report and a folder of data files"
