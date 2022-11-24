@@ -3,7 +3,7 @@
 DNAnexus app using the [MultiQC](https://multiqc.info/docs/) tool developed and maintained by Phil Ewels: [ewels/MultiQC](https://github.com/ewels/MultiQC/)
 
 ## What does this app do?
-This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" section of the config.yaml, then the MultiQC tool is run in a Docker container to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/master/multiqc/modules).
+This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" section of the config.yaml, then the MultiQC tool is run in a Docker container to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/tree/master/multiqc/modules).
 
 It is essential to use a config file that has a "dx_sp" section with "primary" for file extenstions in app/outputs of the primary workflow and "secondary" for file extenstions in app/outputs of the secondary workflow.
 
