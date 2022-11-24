@@ -1,16 +1,14 @@
 # MultiQC (DNAnexus Platform App)
 
-Uses the [MultiQC](https://multiqc.info/docs/) tool developed and maintained by Phil Ewels: [ewels/MultiQC](https://github.com/ewels/MultiQC/)
-
-Docker images are available from [here](https://hub.docker.com/r/ewels/multiqc/)
+DNAnexus app using the [MultiQC](https://multiqc.info/docs/) tool developed and maintained by Phil Ewels: [ewels/MultiQC](https://github.com/ewels/MultiQC/)
 
 ## What does this app do?
-This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" field in the config.yaml. Then runs the MultiQC tool to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/tree/v1.11/multiqc/modules).
+This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" section of the config.yaml, then the MultiQC tool is run in a Docker container to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/master/multiqc/modules).
 
 It is essential to use a config file that has a "dx_sp" section with "primary" for file extenstions in app/outputs of the primary workflow and "secondary" for file extenstions in app/outputs of the secondary workflow.
 
 ## What inputs are required to run this app?
-* `multiqc_docker`: Docker image of the MultiQC tool (can be found in 001_Reference:/assets/MultiQC)
+* `multiqc_docker`: Docker image of the MultiQC tool (approved versions can be found in 001_Reference:/assets/MultiQC, other Docker image versions are available from [here](https://hub.docker.com/r/ewels/multiqc/))
 * `multiqc_config_file`: A config.yaml file specifying which modules to run and the search patterns to recognise QC files for each module
 * input data, which may come from different sources depending on the use-case
 
@@ -45,6 +43,7 @@ The following outputs are placed in the DNAnexus project in the specified output
 4. The MultiQC outputs are uploaded to DNAnexus.
 
 ## How to run this app from command line?
+An example command for a routine run processing
 ```
 dx run multiqc-applet_ID \
 -imultiqc_docker='{}' \
