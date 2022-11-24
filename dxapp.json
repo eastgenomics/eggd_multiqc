@@ -3,10 +3,10 @@
   "title": "eggd_MultiQC",
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
-  "version":"2.0.1",
+  "version":"2.1.0",
   "openSource": true,
   "properties": {
-    "githubRelease": "v2.0.1"
+    "githubRelease": "v2.1.0"
   },
   "inputSpec": [
     {
@@ -94,16 +94,16 @@
     }
   ],
   "runSpec": {
+    "distribution": "Ubuntu",
+    "release": "20.04",
+    "version": "0",
+    "interpreter": "bash",
+    "file": "src/multiqc.sh",
     "timeoutPolicy": {
       "*": {
         "hours": 2
       }
-    },
-    "version": "0",
-    "interpreter": "bash",
-    "release": "20.04",
-    "distribution": "Ubuntu",
-    "file": "src/multiqc.sh"
+    }
   },
   "developers":[
     "user-sophier",
@@ -114,9 +114,7 @@
   ],
   "access": {
     "allProjects":"VIEW",
-    "network": [
-      "*"
-    ]
+    "project": "CONTRIBUTE"
   },
   "regionalOptions": {
     "aws:eu-central-1": {
