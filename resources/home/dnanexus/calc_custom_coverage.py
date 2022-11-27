@@ -9,12 +9,12 @@
             at which coverage should be calculated
 
     Output:
-        - custom_coverage.csv file in the inputs/ folder
+        - custom_coverage.csv file in the specified output folder
             * has headings based on the input depths
             * config.yaml should have the same headings for
             data to be parsed correctly
 
-    Sophie Ratkai 211105
+    Sophie Ratkai 221124
 """
 
 import os
@@ -71,8 +71,10 @@ for file in os.listdir(folder):
 
     custom_coverage = custom_coverage.append(sample_info, ignore_index=True)
 
-custom_coverage.to_csv("inputs/custom_coverage.csv",
+output_folder = sys.argv[3]
+
+custom_coverage.to_csv(output_folder+"/custom_coverage.csv",
     sep=',', encoding='utf-8', header=True, index=False)
 
 
-print("Percentage coverage values were calculated for {} depths and saved to file: inputs/custom_coverage.csv".format(custom_depths))
+print("Percentage coverage values were calculated for {} depths and saved to file: {}/custom_coverage.csv".format(custom_depths, output_folder))
