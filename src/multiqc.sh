@@ -58,6 +58,13 @@ main() {
                 workflowdir="$project:/$primary"
             fi
 
+            # get all file demultiplexing output files to download from project
+            for pattern in $(jq -r '.["demux"] | flatten | join(" ")' config.json); do
+                dx find data --brief --path "${project}:" --name "$pattern"  >> input_files.txt
+                dx find data --brief --path "${project}:" --name "$pattern" | \
+                    xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
+            done
+
             # get all file patterns of files to download from primary workflow output folder,
             # then find and download from project in given folder
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
@@ -76,13 +83,6 @@ main() {
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
                     xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
                 done
-            fi
-
-            # Download Stats.json from the project
-            stats=$(dx find data --brief --path ${project}: --name "Stats.json")
-            if [[ ! -z $stats ]]; then
-                echo $stats >> input_files.txt
-                dx download $stats -o ./"$folder_name"/
             fi
             ;;
     esac
