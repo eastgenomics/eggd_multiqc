@@ -1,5 +1,5 @@
 #!/bin/bash
-# multiqc 2.0.0
+# multiqc 2.1.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
@@ -26,15 +26,22 @@ main() {
     project=$(echo $project_for_multiqc | xargs) # project name
     primary=$(echo $primary_workflow_output | xargs)  # primary workflow name or absolute path to single folder
 
-    # Make directory to pull in all QC files
-    mkdir inputs
+    # Remove 002_ from the beginning of the project name
+    run_name=${project#"002_"}
+    # Set folder_name to a meaningful one to be displayed in the report
+    folder_name="${run_name}-${primary}"
+    mkdir "$folder_name"
+    # Set the report name to include the project and primary workflow folder names
+    report_name="$folder_name-multiqc.html"
+
+    # Create a file to collect file-IDs of inputs
     touch input_files.txt
 
     case $single_folder in
         (true)       # development
-            echo "Downloading all files from the given project:/path/to/folder"
+            echo "Downloading all files from the given folder: $project:/$primary/"
             dx ls --brief $project:/$primary/ > input_files.txt
-            dx download $project:/$primary/* -o ./inputs/
+            dx download $project:/$primary/* -o ./"$folder_name"/
             # substitute '\' with '-' in the single folder path
             renamed=${primary//\//-}
             primary=$renamed
@@ -56,7 +63,7 @@ main() {
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
                 dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
             done
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
@@ -67,7 +74,7 @@ main() {
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                    xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
                 done
             fi
 
@@ -75,7 +82,7 @@ main() {
             stats=$(dx find data --brief --path ${project}: --name "Stats.json")
             if [[ ! -z $stats ]]; then
                 echo $stats >> input_files.txt
-                dx download $stats -o ./inputs/
+                dx download $stats -o ./"$folder_name"/
             fi
             ;;
     esac
@@ -91,22 +98,12 @@ main() {
             echo "Calculating coverage at custom depths"
             mkdir hsmetrics_files  #stores HSmetrics.tsv files to calculate custom coverage
             # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
-            cp inputs/*hsmetrics.tsv hsmetrics_files
+            cp "$folder_name"/*hsmetrics.tsv hsmetrics_files
             # Run the Python script, returns output into inputs/
             echo "$depths"
-            python3 calc_custom_coverage.py hsmetrics_files "$depths"
+            python3 calc_custom_coverage.py hsmetrics_files "$depths" "$folder_name"
             ;;
     esac
-
-    # Remove 002_ from the beginning of the project name
-    project=${project#"002_"}
-    # Remove '_clinicalgenetics' from the end of the project name
-    project=${project%"_clinicalgenetics"}
-    # Rename inputs folder to a more meaningful one to be displayed in the report
-    # Set the report name to include the project and primary workflow
-    folder_name="${project}-${primary}"
-    mv inputs "$folder_name"
-    report_name="$folder_name-multiqc.html"
 
     # Create the output folders that will be recognised by the job upon completion
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
