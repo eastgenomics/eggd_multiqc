@@ -6,6 +6,7 @@ set -e -x -o pipefail
 
 main() {
 
+    mark-section "Installing packages"
     echo "Installing packages"
     sudo dpkg -i sysstat*.deb
     sudo dpkg -i parallel*.deb
@@ -15,6 +16,7 @@ main() {
     pip install -q jq-* yq-*
     cd ..
 
+    mark-section "Downloading input files"
     echo "Downloading Docker image and config file"
     # Download the MultiQC docker image
     dx download "$multiqc_docker" -o MultiQC.tar.gz
@@ -47,6 +49,7 @@ main() {
             primary=$renamed
             ;;
         (false)      # production
+            mark-section "Collecting metric files"
             echo "Download QC metrics files as specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
 
@@ -94,6 +97,7 @@ main() {
                 echo "Collecting files from multi took $(($duration / 60))m$(($duration % 60))s."
             fi
 
+            mark-section "Downloading metric files"
             # Now that files are collected they need to be loaded into the workstation
             SECONDS=0
             < input_files.txt xargs -P12 -n1 -I{} dx download {} -o ./"$folder_name"/
@@ -105,6 +109,7 @@ main() {
     # If the option was selected to calculate additional coverage:
     case $calc_custom_coverage in
         (true)
+            mark-section "Calculating custom coverage"
             SECONDS=0
             echo "Installing required Python packages"
             cd packages
@@ -128,6 +133,7 @@ main() {
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
 
+    mark-section "Running MultiQC"
     echo "Running MultiQC on the downloaded QC metric files"
     # Load the docker image and then run it
     SECONDS=0
@@ -142,6 +148,7 @@ main() {
     duration=$SECONDS
     echo "Running MultiQC took $(($duration / 60))m$(($duration % 60))s."
 
+    mark-section "Uploading output"
     echo "Uploading the config file, html report and a folder of data files"
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$multiqc_config_file_name
@@ -151,5 +158,7 @@ main() {
     mv input_files.txt ${outdir}/
     # Upload results
     dx-upload-all-outputs --parallel
+    
+    mark-success
 
 }
