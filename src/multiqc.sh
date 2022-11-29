@@ -47,7 +47,7 @@ main() {
             primary=$renamed
             ;;
         (false)      # production
-            echo "Download all QC metrics from the folders specified in the config file"
+            echo "Download QC metrics files as specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
 
             # Check that an /output/ folder exists in the root of the project
@@ -58,38 +58,54 @@ main() {
                 workflowdir="$project:/$primary"
             fi
 
+            SECONDS=0
             # get all file demultiplexing output files to download from project
             for pattern in $(jq -r '.["demux"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "${project}:" --name "$pattern"  >> input_files.txt
-                dx find data --brief --path "${project}:" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
+                # dx find data --brief --path "${project}:" --name "$pattern" | \
+                #     xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
             done
+            duration=$SECONDS
+            echo "Collecting demux files took $(($duration / 60))m$(($duration % 60))s."
 
+            SECONDS=0
             # get all file patterns of files to download from primary workflow output folder,
             # then find and download from project in given folder
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
-                dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
+                # dx find data --brief --path "$workflowdir" --name "$pattern" | \
+                # xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
             done
+            duration=$SECONDS
+            echo "Collecting files from single took $(($duration / 60))m$(($duration % 60))s."
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
+                SECONDS=0
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
                 
                 # get all file patterns of files to download from secondary workflow output folder,
                 # then find and download from project in given folder
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
-                    dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
+                    # dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
+                    # xargs -P4 -n1 -I{} dx download {} -o ./"$folder_name"/
                 done
+                duration=$SECONDS
+                echo "Collecting files from multi took $(($duration / 60))m$(($duration % 60))s."
             fi
+
+            # Now that files are collected they need to be loaded into the workstation
+            SECONDS=0
+            < input_files.txt xargs -P12 -n1 -I{} dx download {} -o ./"$folder_name"/
+            duration=$SECONDS
+            echo "Collecting files with 12 threads took $(($duration / 60))m$(($duration % 60))s."
             ;;
     esac
 
     # If the option was selected to calculate additional coverage:
     case $calc_custom_coverage in
         (true)
+            SECONDS=0
             echo "Installing required Python packages"
             cd packages
             pip install -q pytz-* python_dateutil-* numpy-* pandas-*
@@ -100,8 +116,11 @@ main() {
             # Copy HSmetrics.tsv files into separate folder for custom coverage calculation
             cp "$folder_name"/*hsmetrics.tsv hsmetrics_files
             # Run the Python script, returns output into inputs/
-            echo "$depths"
+            echo "Additional coverage will be calculated at $depths x"
             python3 calc_custom_coverage.py hsmetrics_files "$depths" "$folder_name"
+
+            duration=$SECONDS
+            echo "Calculating additional coverage took $(($duration / 60))m$(($duration % 60))s."
             ;;
     esac
 
@@ -111,9 +130,17 @@ main() {
 
     echo "Running MultiQC on the downloaded QC metric files"
     # Load the docker image and then run it
+    SECONDS=0
     docker load -i MultiQC.tar.gz
+    duration=$SECONDS
+    echo "Loading the MultiQC Docker image took $(($duration / 60))m$(($duration % 60))s."
+
     MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep multiqc | cut -d' ' -f2)
+
+    SECONDS=0
     docker run -v /home/dnanexus:/egg $MultiQC_image /egg/"$folder_name" -c /egg/config.yaml -n /egg/${outdir}/$report_name
+    duration=$SECONDS
+    echo "Running MultiQC took $(($duration / 60))m$(($duration % 60))s."
 
     echo "Uploading the config file, html report and a folder of data files"
     # Move the config file to the multiqc data output folder. This was created by running multiqc
@@ -124,4 +151,5 @@ main() {
     mv input_files.txt ${outdir}/
     # Upload results
     dx-upload-all-outputs --parallel
+
 }
