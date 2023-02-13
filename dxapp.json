@@ -4,10 +4,7 @@
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "version":"2.1.0",
-  "openSource": true,
-  "properties": {
-    "githubRelease": "v2.1.0"
-  },
+  "whatsNew": "* v2.1.0 Change how input files are downloaded, primarily to accommodate bclconvert replacing bcl2fastq;",
   "inputSpec": [
     {
       "name": "multiqc_docker",
@@ -19,9 +16,9 @@
         "$dnanexus_link": "file-G61JxF84g59YVK4G43FzGzGp"
       },
       "suggestions": [
-        {
-          "project": "project-FpG6k2Q4g59bZJ0z15XzByFY",
-          "path": "/"
+       {
+          "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+          "path": "/assets/multiQC"
         }
       ]
     },
@@ -31,7 +28,13 @@
       "help": "must have 'sp' and 'dx_sp' keys that specify all modules and relevant file extensions to be displayed in the report",
       "optional": false,
       "class": "file",
-      "patterns": ["*.yaml"]
+      "patterns": ["*.yaml"],
+      "suggestions": [
+       {
+          "project": "project-Fkb6Gkj433GVVvj73J7x8KbV",
+          "path": "/dynamic_files/multiqc_config"
+        }
+      ]
     },
     {
       "name": "single_folder",
@@ -106,7 +109,6 @@
     }
   },
   "developers":[
-    "user-sophier",
     "org-emee_1"
   ],
   "authorizedUsers": [
@@ -114,10 +116,7 @@
   ],
   "access": {
     "allProjects":"VIEW",
-    "project": "CONTRIBUTE",
-    "network": [
-      "*"
-    ]
+    "project": "CONTRIBUTE"
   },
   "regionalOptions": {
     "aws:eu-central-1": {
