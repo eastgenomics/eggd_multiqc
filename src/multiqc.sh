@@ -43,12 +43,14 @@ main() {
             echo "Download all QC metrics from the folders specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
 
-            # Check that an /output/ folder exists in the root of the project
-            output_dir=$(dx ls --folders --brief  "$project:/output/")
-            if [[ $output_dir ]]; then
-                workflowdir="$project:/output/$primary"
-            else
+            if [[ $(dx find data --path "${project}:/$primary") ]]; then
+                # found data in specified dir => use it
                 workflowdir="$project:/$primary"
+            elif [[ $(dx find data --path "${project}:/output/${primary}") ]]; then
+                # dir specified without output prefix
+                workflowdir="$project:/output/${primary}"
+            else
+                dx-jobutil-report-error "Given primary output directory does not contain data"
             fi
 
             # get all file patterns of files to download from primary workflow output folder,
@@ -56,18 +58,22 @@ main() {
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
                 dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
             done
+
+            ls
+            sleep 5
+            ls ./inputs
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
-                
+
                 # get all file patterns of files to download from secondary workflow output folder,
                 # then find and download from project in given folder
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                        xargs -P4 -n1 -I{} dx download {} -o ./inputs/
                 done
             fi
 
@@ -103,8 +109,8 @@ main() {
     # Remove '_clinicalgenetics' from the end of the project name
     project=${project%"_clinicalgenetics"}
     # Rename inputs folder to a more meaningful one to be displayed in the report
-    # Set the report name to include the project and primary workflow
-    folder_name="${project}-${primary}"
+    # Set the report name to include the project and last part of primary workflow
+    folder_name="${project}-${primary##*/}"
     mv inputs "$folder_name"
     report_name="$folder_name-multiqc.html"
 
