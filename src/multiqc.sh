@@ -61,10 +61,6 @@ main() {
                     xargs -P4 -n1 -I{} dx download {} -o ./inputs/
             done
 
-            ls
-            sleep 5
-            ls ./inputs
-
             if [[ ! -z ${secondary_workflow_output} ]]; then
                 secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
 
