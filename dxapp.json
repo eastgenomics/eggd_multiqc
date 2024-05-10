@@ -106,7 +106,6 @@
     "file": "src/multiqc.sh"
   },
   "developers":[
-    "user-sophier",
     "org-emee_1"
   ],
   "authorizedUsers": [
