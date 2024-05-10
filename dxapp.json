@@ -114,9 +114,7 @@
   ],
   "access": {
     "allProjects":"VIEW",
-    "network": [
-      "*"
-    ]
+    "project": "CONTRIBUTE"
   },
   "regionalOptions": {
     "aws:eu-central-1": {
