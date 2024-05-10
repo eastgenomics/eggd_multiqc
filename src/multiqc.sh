@@ -1,5 +1,4 @@
 #!/bin/bash
-# multiqc 2.0.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
