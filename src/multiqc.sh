@@ -107,7 +107,7 @@ main() {
     project=${project%"_clinicalgenetics"}
     # Rename inputs folder to a more meaningful one to be displayed in the report
     # Set the report name to include the project and primary workflow
-    folder_name="${project}-${primary}"
+    folder_name="${project}-${primary##*/}"
     mv inputs "$folder_name"
     report_name="$folder_name-multiqc.html"
 
