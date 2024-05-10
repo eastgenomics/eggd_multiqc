@@ -13,7 +13,7 @@ main() {
     sudo dpkg -s jq | grep -i version
 
     cd packages
-    pip install -q jq-* yq-*
+    pip install -q argcomplete-* PyYAML-* toml-* xmltodict-* jq-* yq-*
     cd ..
 
     echo "Downloading Docker image and config file"
