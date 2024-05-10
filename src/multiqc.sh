@@ -44,11 +44,14 @@ main() {
             yq '.["dx_sp"]' config.yaml > config.json
 
             # Check that an /output/ folder exists in the root of the project
-            output_dir=$(dx ls --folders --brief  "$project:/output/")
-            if [[ $output_dir ]]; then
-                workflowdir="$project:/output/$primary"
-            else
+            if [[ $(dx find data --path "$primary") ]]; then
+                # found data in specified dir => use it
                 workflowdir="$project:/$primary"
+            elif [[ $(dx find data --path "/output/${primary}") ]]; then
+                # dir specified without output prefix
+                workflowdir="$project:/output/${primary}"
+            else
+                dx-jobutil-report-error "Given primary output directory does not contain data"
             fi
 
             # get all file patterns of files to download from primary workflow output folder,
