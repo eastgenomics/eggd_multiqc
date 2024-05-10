@@ -6,7 +6,6 @@ set -e -x -o pipefail
 kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
 
 main() {
-
     echo "Installing packages"
     sudo dpkg -i sysstat*.deb
     sudo dpkg -i parallel*.deb
