@@ -3,10 +3,10 @@
   "title": "eggd_MultiQC",
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
-  "version":"2.0.1",
+  "version":"2.0.2",
   "openSource": true,
   "properties": {
-    "githubRelease": "v2.0.1"
+    "githubRelease": "v2.0.2"
   },
   "inputSpec": [
     {
