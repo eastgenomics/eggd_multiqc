@@ -2,6 +2,8 @@
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
+# set frequency of instance usage in logs to 30 seconds
+kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
 
 main() {
 
@@ -58,7 +60,7 @@ main() {
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
                 dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
             done
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
