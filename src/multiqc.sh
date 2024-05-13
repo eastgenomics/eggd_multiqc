@@ -43,11 +43,10 @@ main() {
             echo "Download all QC metrics from the folders specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
 
-            # Check that an /output/ folder exists in the root of the project
-            if [[ $(dx find data --path "$primary") ]]; then
+            if [[ $(dx find data --path "$project:$primary" --brief) ]]; then
                 # found data in specified dir => use it
                 workflowdir="$project:/$primary"
-            elif [[ $(dx find data --path "/output/${primary}") ]]; then
+            elif [[ $(dx find data --path "$project:/output/${primary}" --brief) ]]; then
                 # dir specified without output prefix
                 workflowdir="$project:/output/${primary}"
             else
@@ -70,7 +69,7 @@ main() {
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                    xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
                 done
             fi
 
