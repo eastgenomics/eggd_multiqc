@@ -1,18 +1,19 @@
 #!/bin/bash
-# multiqc 2.0.0
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
+# set frequency of instance usage in logs to 30 seconds
+kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
+/usr/bin/dx-dstat 30
 
 main() {
-
     echo "Installing packages"
     sudo dpkg -i sysstat*.deb
     sudo dpkg -i parallel*.deb
     sudo dpkg -s jq | grep -i version
 
     cd packages
-    pip install -q jq-* yq-*
+    pip install -q argcomplete-* PyYAML-* toml-* xmltodict-* jq-* yq-*
     cd ..
 
     echo "Downloading Docker image and config file"
@@ -43,12 +44,14 @@ main() {
             echo "Download all QC metrics from the folders specified in the config file"
             yq '.["dx_sp"]' config.yaml > config.json
 
-            # Check that an /output/ folder exists in the root of the project
-            output_dir=$(dx ls --folders --brief  "$project:/output/")
-            if [[ $output_dir ]]; then
-                workflowdir="$project:/output/$primary"
-            else
+            if [[ $(dx find data --path "$project:$primary" --brief) ]]; then
+                # found data in specified dir => use it
                 workflowdir="$project:/$primary"
+            elif [[ $(dx find data --path "$project:/output/${primary}" --brief) ]]; then
+                # dir specified without output prefix
+                workflowdir="$project:/output/${primary}"
+            else
+                dx-jobutil-report-error "Given primary output directory does not contain data"
             fi
 
             # get all file patterns of files to download from primary workflow output folder,
@@ -56,7 +59,7 @@ main() {
             for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
                 dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
                 dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
             done
 
             if [[ ! -z ${secondary_workflow_output} ]]; then
@@ -67,7 +70,7 @@ main() {
                 for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
                     dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P4 -n1 -I{} dx download {} -o ./inputs/
+                    xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
                 done
             fi
 
@@ -104,7 +107,7 @@ main() {
     project=${project%"_clinicalgenetics"}
     # Rename inputs folder to a more meaningful one to be displayed in the report
     # Set the report name to include the project and primary workflow
-    folder_name="${project}-${primary}"
+    folder_name="${project}-${primary##*/}"
     mv inputs "$folder_name"
     report_name="$folder_name-multiqc.html"
 
