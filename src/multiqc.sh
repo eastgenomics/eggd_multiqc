@@ -4,6 +4,7 @@
 set -e -x -o pipefail
 # set frequency of instance usage in logs to 30 seconds
 kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
+/usr/bin/dx-dstat 30
 
 main() {
     echo "Installing packages"
