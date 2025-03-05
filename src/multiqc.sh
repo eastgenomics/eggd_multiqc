@@ -7,20 +7,8 @@ kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
 /usr/bin/dx-dstat 30
 
 main() {
-    echo "Installing packages"
-    sudo dpkg -i sysstat*.deb
-    sudo dpkg -i parallel*.deb
-    sudo dpkg -s jq | grep -i version
-
-    cd packages
-    pip install -q argcomplete-* PyYAML-* toml-* xmltodict-* jq-* yq-*
-    cd ..
-
     echo "Downloading Docker image and config file"
-    # Download the MultiQC docker image
     dx download "$multiqc_docker" -o MultiQC.tar.gz
-
-    # Download the config file
     dx download "$multiqc_config_file" -o config.yaml
 
     # xargs strips leading/trailing whitespace from input strings submitted by the user
@@ -31,65 +19,35 @@ main() {
     mkdir inputs
     touch input_files.txt
 
-    case $single_folder in
-        (true)       # development
-            echo "Downloading all files from the given project:/path/to/folder"
-            dx ls --brief $project:/$primary/ > input_files.txt
-            dx download $project:/$primary/* -o ./inputs/
-            # substitute '\' with '-' in the single folder path
-            renamed=${primary//\//-}
-            primary=$renamed
-            ;;
-        (false)      # production
-            echo "Download all QC metrics from the folders specified in the config file"
-            yq '.["dx_sp"]' config.yaml > config.json
+    echo "Download all QC metrics from the folders specified in the config file"
 
-            if [[ $(dx find data --path "$project:$primary" --brief) ]]; then
-                # found data in specified dir => use it
-                workflowdir="$project:/$primary"
-            elif [[ $(dx find data --path "$project:/output/${primary}" --brief) ]]; then
-                # dir specified without output prefix
-                workflowdir="$project:/output/${primary}"
-            else
-                dx-jobutil-report-error "Given primary output directory does not contain data"
-            fi
+    if [[ $(dx find data --path "$project:$primary" --brief) ]]; then
+        # found data in specified dir => use it
+        workflowdir="$project:/$primary"
+    else
+        dx-jobutil-report-error "Given primary output directory does not contain data"
+    fi
 
-            # get all file patterns of files to download from primary workflow output folder,
-            # then find and download from project in given folder
-            for pattern in $(jq -r '.["primary"] | flatten | join(" ")' config.json); do
-                dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
-                dx find data --brief --path "$workflowdir" --name "$pattern" | \
-                xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
-            done
+    # get all file patterns of files to download from primary workflow output folder,
+    # then find and download from project in given folder
+    for pattern in $(~/yq_4.45.1 -r '.["dx_sp"].["primary"].[] | flatten | join(" ")' config.yaml); do
+        dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
+    done
 
-            if [[ ! -z ${secondary_workflow_output} ]]; then
-                secondary=$(echo $secondary_workflow_output | xargs) # eg Dias multi-sample workflow
-                
-                # get all file patterns of files to download from secondary workflow output folder,
-                # then find and download from project in given folder
-                for pattern in $(jq -r '.["secondary"] | flatten | join(" ")' config.json); do
-                    dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern"  >> input_files.txt
-                    dx find data --brief --path "$workflowdir"/"$secondary" --name "$pattern" | \
-                    xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
-                done
-            fi
+    cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
 
-            # Download Stats.json from the project
-            stats=$(dx find data --brief --path ${project}: --name "Stats.json")
-            if [[ ! -z $stats ]]; then
-                echo $stats >> input_files.txt
-                dx download $stats -o ./inputs/
-            fi
-            ;;
-    esac
+    # Download Stats.json from the project
+    stats=$(dx find data --brief --path ${project}: --name "Stats.json")
+    if [[ ! -z $stats ]]; then
+        echo $stats >> input_files.txt
+        dx download $stats -o ./inputs/
+    fi
 
     # If the option was selected to calculate additional coverage:
     case $calc_custom_coverage in
         (true)
             echo "Installing required Python packages"
-            cd packages
             pip install -q pytz-* python_dateutil-* numpy-* pandas-*
-            cd ..
 
             echo "Calculating coverage at custom depths"
             mkdir hsmetrics_files  #stores HSmetrics.tsv files to calculate custom coverage
@@ -119,13 +77,14 @@ main() {
     # Load the docker image and then run it
     docker load -i MultiQC.tar.gz
     MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep multiqc | cut -d' ' -f2)
-    docker run -v /home/dnanexus:/egg $MultiQC_image /egg/"$folder_name" -c /egg/config.yaml -n /egg/${outdir}/$report_name
+    docker run -v /home/dnanexus:/egg -w /egg $MultiQC_image multiqc "$folder_name" -c config.yaml
 
     echo "Uploading the config file, html report and a folder of data files"
+    mv multiqc_data ${outdir}/
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$multiqc_config_file_name
     # Move the multiqc report HTML to the output directory for uploading
-    mv ${outdir}/$report_name ${report_outdir}
+    mv multiqc_report.html ${report_outdir}/$report_name
     # Upload the input_files.txt to keep an audit trail
     mv input_files.txt ${outdir}/
     # Upload results
