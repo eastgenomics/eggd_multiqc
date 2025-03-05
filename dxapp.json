@@ -3,10 +3,10 @@
   "title": "eggd_MultiQC",
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
-  "version":"2.0.2",
+  "version": "3.0.0",
   "openSource": true,
   "properties": {
-    "githubRelease": "v2.0.2"
+    "githubRelease": "v3.0.0"
   },
   "inputSpec": [
     {
@@ -14,7 +14,10 @@
       "label": "Docker image tar.gz of the MultiQC tool",
       "optional": false,
       "class": "file",
-      "patterns": [ "*.tar", "*.tar.gz"],
+      "patterns": [
+        "*.tar",
+        "*.tar.gz"
+      ],
       "default": {
         "$dnanexus_link": "file-G61JxF84g59YVK4G43FzGzGp"
       },
@@ -31,15 +34,9 @@
       "help": "must have 'sp' and 'dx_sp' keys that specify all modules and relevant file extensions to be displayed in the report",
       "optional": false,
       "class": "file",
-      "patterns": ["*.yaml"]
-    },
-    {
-      "name": "single_folder",
-      "label": "Run MultiQC on a single data folder?",
-      "help": "only and all files in the project:/path/to/folder/* will be downloaded and passed to MultiQC, will break if the folder has further subfolders",
-      "optional": true,
-      "class": "boolean",
-      "default": false
+      "patterns": [
+        "*.yaml"
+      ]
     },
     {
       "name": "project_for_multiqc",
@@ -53,13 +50,6 @@
       "label": "Primary workflow output directory name OR path to a specific folder in the project",
       "help": "Name of the directory that holds the QC data: single_sample/main workflow OR absolute path to a single folder. Examples: 'dias_single_v#-TWE_v#-YYMMDD-1' or 'uranus_YYMMDD_1' or '/foo/bar/all_QC_files/'",
       "optional": false,
-      "class": "string"
-    },
-    {
-      "name": "secondary_workflow_output",
-      "label": "Secondary workflow output directory OPTIONAL",
-      "help": "eg 'dias_multi_v#-TWE_v#-YYMMDD-1'",
-      "optional": true,
       "class": "string"
     },
     {
@@ -101,18 +91,18 @@
     },
     "version": "0",
     "interpreter": "bash",
-    "release": "20.04",
+    "release": "24.04",
     "distribution": "Ubuntu",
     "file": "src/multiqc.sh"
   },
-  "developers":[
+  "developers": [
     "org-emee_1"
   ],
   "authorizedUsers": [
     "org-emee_1"
   ],
   "access": {
-    "allProjects":"VIEW",
+    "allProjects": "VIEW",
     "project": "CONTRIBUTE"
   },
   "regionalOptions": {
