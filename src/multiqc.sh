@@ -47,7 +47,7 @@ main() {
     case $calc_custom_coverage in
         (true)
             echo "Installing required Python packages"
-            pip install -q pytz-* python_dateutil-* numpy-* pandas-*
+            sudo -H python3 -m pip install --no-index --no-deps packages/*
 
             echo "Calculating coverage at custom depths"
             mkdir hsmetrics_files  #stores HSmetrics.tsv files to calculate custom coverage
