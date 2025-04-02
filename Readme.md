@@ -16,13 +16,12 @@ It is essential to use a config file that has a "dx_sp" section with "primary" f
 * `multiqc_config_file`: A config.yaml file specifying which modules to run and the search patterns to recognise QC files for each module
 * input data, which may come from different sources depending on the use-case
 * `project_for_multiqc` - the name of the project to be used, eg 002_211008_A01303_0030_AHKTMYDRXY_TWE
-  * This project must have an 'output' folder in its root directory (project:/output/).
 * `primary_workflow_output` - the exact name of the output directory of the primary workflow, eg. dias_single_v1.2.3-TWE_v1.0.5-211011-1)
   * This folder must have subfolders for each app, like project:/output/primary_workflow/app_output)
 
 Optional inputs:
 
-* calc_custom_coverage: Boolean to indicate whether custom coverage needs to be computed and added to the multiqc report. Used in Myeloid pipeline to provide high x coverage.
+* calc_custom_coverage: Boolean to indicate whether custom coverage needs to be computed and added to the multiqc report.
 * depths: Depths to compute coverage for.
 
 ## What does this app output?
