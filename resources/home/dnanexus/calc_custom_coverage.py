@@ -82,7 +82,8 @@ for file in os.listdir(folder):
         Usable_unique_bases_on_target
     )
 
-    custom_coverage = custom_coverage.append(sample_info, ignore_index=True)
+    sample_info = pd.DataFrame.from_records([sample_info])
+    custom_coverage = pd.concat([custom_coverage, sample_info], ignore_index=True)
 
 custom_coverage.to_csv(
     "inputs/custom_coverage.csv",
