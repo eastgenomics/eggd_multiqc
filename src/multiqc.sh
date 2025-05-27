@@ -36,11 +36,16 @@ main() {
 
     cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
 
-    # Download Stats.json from the project
-    stats=$(dx find data --brief --path ${project}: --name "Stats.json")
-    if [[ ! -z $stats ]]; then
-        echo $stats >> input_files.txt
-        dx download $stats -o ./inputs/
+    # Download all /demultiplex_multiqc_files
+    echo "Looking for files in /demultiplex_multiqc_files"
+    demultiplex_multiqc_files_directory="${project}:/demultiplex_multiqc_files"
+
+    # Check if the directory exists and contains any files
+    if dx find data --path "$demultiplex_multiqc_files_directory" --brief | grep -q .; then
+        echo "Downloading files from $demultiplex_multiqc_files_directory"
+        dx find data --brief --path "$demultiplex_multiqc_files_directory" >> input_files.txt
+    else
+        echo "No files found in /demultiplex_multiqc_files"
     fi
 
     # If the option was selected to calculate additional coverage:
@@ -59,6 +64,11 @@ main() {
             ;;
     esac
 
+
+    # Define 001_staging_area52
+    staging_area="project-FpVG0G84X7kzq58g19vF1YJQ"
+    interOp_location="250425_A01303_0546_BHY2MMDRX5"
+
     # Remove 002_ from the beginning of the project name
     project=${project#"002_"}
     # Remove '_clinicalgenetics' from the end of the project name
@@ -72,41 +82,6 @@ main() {
     # Create the output folders that will be recognised by the job upon completion
     report_outdir=out/multiqc_html_report && mkdir -p ${report_outdir}
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
-
-    # Define 001_staging_area52
-    staging_area="project-FpVG0G84X7kzq58g19vF1YJQ"
-    mkdir -p interop_pkg
-    tar -xvjf ~/illumina-interop-1.4.0-h503566f_0.tar.bz2 -C interop_pkg
-    # Add interop_pkg/bin to path
-    export PATH="$PWD/interop_pkg/bin:$PATH"
-
-
-    # Find InterOp and RunInfo files
-    interop_files=$(dx find data --brief --path "${interop_project}:/${folder_name}/" --name "InterOp.tar.gz")
-    run_xml=$(dx find data --brief --path "${interop_project}:/${folder_name}/" --name "RunInfo.xml")
-
-    # Download InterOp and RunInfo files
-    if [[ ! -z "$interop_files" ]]; then
-        echo "Downloading InterOp binary files"
-        echo "$interop_files" | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/ --overwrite
-        echo "$run_xml" | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/ --overwrite
-
-    else
-        echo "No InterOp files found in ${interop_project}:/${folder_name}"
-    fi
-
-    # Run interop_summary and interop_index-summary
-    if [[ -f inputs/InterOp.tar.gz ]]; then
-        echo "Extracting InterOp.tar.gz"
-        tar -xzf inputs/InterOp.tar.gz -C inputs/
-
-        echo "Generating InterOp summary CSV files"
-        interop_summary --csv=1 inputs/ > inputs/interop_summary.csv || echo "interop_summary failed"
-        interop_index-summary --csv=1 inputs/ > inputs/interop_index_summary.csv || echo "interop_index-summary failed"
-    else
-        echo "No InterOp.tar.gz file to extract"
-    fi
-
 
     echo "Running MultiQC on the downloaded QC metric files"
     # Load the docker image and then run it
