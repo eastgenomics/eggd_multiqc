@@ -64,11 +64,6 @@ main() {
             ;;
     esac
 
-
-    # Define 001_staging_area52
-    staging_area="project-FpVG0G84X7kzq58g19vF1YJQ"
-    interOp_location="250425_A01303_0546_BHY2MMDRX5"
-
     # Remove 002_ from the beginning of the project name
     project=${project#"002_"}
     # Remove '_clinicalgenetics' from the end of the project name
