@@ -1,6 +1,6 @@
 {
-  "name": "eggd_MultiQC_interop",
-  "title": "eggd_MultiQC_interop",
+  "name": "eggd_MultiQC",
+  "title": "eggd_MultiQC",
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
   "version": "3.1.0",
