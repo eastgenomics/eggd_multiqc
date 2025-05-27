@@ -36,11 +36,16 @@ main() {
 
     cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
 
-    # Download Stats.json from the project
-    stats=$(dx find data --brief --path ${project}: --name "Stats.json")
-    if [[ ! -z $stats ]]; then
-        echo $stats >> input_files.txt
-        dx download $stats -o ./inputs/
+    # Download all /demultiplex_multiqc_files
+    echo "Looking for files in /demultiplex_multiqc_files"
+    demultiplex_multiqc_files_directory="${project}:/demultiplex_multiqc_files"
+
+    # Check if the directory exists and contains any files
+    if dx find data --path "$demultiplex_multiqc_files_directory" --brief | grep -q .; then
+        echo "Downloading files from $demultiplex_multiqc_files_directory"
+        dx find data --brief --path "$demultiplex_multiqc_files_directory" >> input_files.txt
+    else
+        echo "No files found in /demultiplex_multiqc_files"
     fi
 
     # If the option was selected to calculate additional coverage:
