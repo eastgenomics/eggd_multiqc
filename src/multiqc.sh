@@ -43,7 +43,10 @@ main() {
     # Check if the directory exists and contains any files
     if dx find data --path "$demultiplex_multiqc_files_directory" --brief | grep -q .; then
         echo "Downloading files from $demultiplex_multiqc_files_directory"
-        dx find data --brief --path "$demultiplex_multiqc_files_directory" >> input_files.txt
+        # Fetch and download InterOp files in parallel
+        dx find data --brief --path "$demultiplex_multiqc_files_directory" \
+          | tee -a input_files.txt \
+          | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
     else
         echo "No files found in /demultiplex_multiqc_files"
     fi
