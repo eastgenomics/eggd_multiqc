@@ -34,7 +34,7 @@ main() {
         dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
     done
 
-    cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
+    cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download -f {} -o ./inputs/
 
     # Download all /demultiplex_multiqc_files
     echo "Looking for files in /demultiplex_multiqc_files"
@@ -46,7 +46,7 @@ main() {
         # Fetch and download InterOp files in parallel
         dx find data --brief --path "$demultiplex_multiqc_files_directory" \
           | tee -a input_files.txt \
-          | xargs -P$(nproc --all) -n1 -I{} dx download {} -o ./inputs/
+          | xargs -P$(nproc --all) -n1 -I{} dx download -f {} -o ./inputs/
     else
         echo "No files found in /demultiplex_multiqc_files"
     fi
