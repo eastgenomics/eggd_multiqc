@@ -5,9 +5,6 @@
   "dxapi": "1.0.0",
   "version": "3.1.0",
   "openSource": true,
-  "properties": {
-    "githubRelease": "v3.0.0"
-  },
   "inputSpec": [
     {
       "name": "multiqc_docker",
