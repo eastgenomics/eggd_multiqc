@@ -20,10 +20,10 @@ main() {
     touch input_files.txt
 
     echo "Download all QC metrics from the folders specified in the config file"
-    if [[ $(dx find data --path "${project}:/$primary") ]]; then
+    if dx find data --path "${project}:/$primary" --brief; then
         # found data in specified dir => use it
         workflowdir="$project:/$primary"
-    elif [[ $(dx find data --path "${project}:/output/${primary}") ]]; then
+    elif dx find data --path "${project}:/output/${primary}" --brief; then
         # dir specified without output prefix
         workflowdir="$project:/output/${primary}"
     else
