@@ -20,14 +20,15 @@ main() {
     touch input_files.txt
 
     echo "Download all QC metrics from the folders specified in the config file"
-
-    if [[ $(dx find data --path "$project:$primary" --brief) ]]; then
+    if dx find data --path "${project}:/$primary" --brief; then
         # found data in specified dir => use it
         workflowdir="$project:/$primary"
+    elif dx find data --path "${project}:/output/${primary}" --brief; then
+        # dir specified without output prefix
+        workflowdir="$project:/output/${primary}"
     else
         dx-jobutil-report-error "Given primary output directory does not contain data"
     fi
-
     # get all file patterns of files to download from primary workflow output folder,
     # then find and download from project in given folder
     for pattern in $(~/yq_4.45.1 -r '.["dx_sp"].["primary"].[] | flatten | join(" ")' config.yaml); do
