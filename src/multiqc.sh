@@ -20,10 +20,10 @@ main() {
     touch input_files.txt
 
     echo "Download all QC metrics from the folders specified in the config file"
-    if dx find data --path "${project}:/$primary" --brief; then
+    if [[ $(dx find data --path "${project}:/$primary") ]]; then
         # found data in specified dir => use it
         workflowdir="$project:/$primary"
-    elif dx find data --path "${project}:/output/${primary}" --brief; then
+    elif [[ $(dx find data --path "${project}:/output/${primary}") ]]; then
         # dir specified without output prefix
         workflowdir="$project:/output/${primary}"
     else
@@ -42,7 +42,7 @@ main() {
     demultiplex_multiqc_files_directory="${project}:/demultiplex_multiqc_files"
 
     # Check if the directory exists and contains any files
-    if dx find data --path "$demultiplex_multiqc_files_directory" --brief | grep -q .; then
+    if dx find data --path "$demultiplex_multiqc_files_directory" --brief; then
         echo "Downloading files from $demultiplex_multiqc_files_directory"
         # Fetch and download InterOp files in parallel
         dx find data --brief --path "$demultiplex_multiqc_files_directory" \
