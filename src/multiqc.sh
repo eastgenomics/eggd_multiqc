@@ -3,9 +3,9 @@
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
 
-# set frequency of instance usage in logs to 30 seconds
+# set frequency of instance usage in logs to 10 seconds
 kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
-/usr/bin/dx-dstat 30
+/usr/bin/dx-dstat 10
 
 _parse_samplesheet_wells() {
     : '''
@@ -118,8 +118,10 @@ main() {
 
     # Remove 002_ from the beginning of the project name
     project=${project#"002_"}
+
     # Remove '_clinicalgenetics' from the end of the project name
     project=${project%"_clinicalgenetics"}
+
     # Rename inputs folder to a more meaningful one to be displayed in the report
     # Set the report name to include the project and primary workflow
     folder_name="${project}-${primary##*/}"
@@ -131,19 +133,21 @@ main() {
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
 
     echo "Running MultiQC on the downloaded QC metric files"
-    # Load the docker image and then run it
     docker load -i MultiQC.tar.gz
     MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep multiqc | cut -d' ' -f2)
     docker run -v /home/dnanexus:/egg -w /egg $MultiQC_image multiqc "$folder_name" -c config.yaml
 
     echo "Uploading the config file, html report and a folder of data files"
     mv multiqc_data ${outdir}/
+
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$multiqc_config_file_name
+
     # Move the multiqc report HTML to the output directory for uploading
     mv multiqc_report.html ${report_outdir}/$report_name
+
     # Upload the input_files.txt to keep an audit trail
     mv input_files.txt ${outdir}/
-    # Upload results
+
     dx-upload-all-outputs --parallel
 }
