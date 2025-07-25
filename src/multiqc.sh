@@ -45,7 +45,7 @@ _parse_samplesheet_wells() {
         | awk '{ arr[$2] = (arr[$2] ? arr[$2] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
         | sort -k1 >> inputs/samplesheet_well_samplename_patterns.tsv
 
-    sort -k3n samplesheet_wells.tsv \
+    sort -k3n inputs/samplesheet_wells.tsv \
         | awk '{ arr[$3] = (arr[$3] ? arr[$3] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
         | sort -k1n >> inputs/samplesheet_well_samplename_patterns.tsv
 }
