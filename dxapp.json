@@ -3,7 +3,7 @@
   "title": "eggd_MultiQC",
   "summary": "MultiQC -  Generates a run-wide visualisation of QC reports",
   "dxapi": "1.0.0",
-  "version": "3.1.0",
+  "version": "0.0.1",
   "openSource": true,
   "inputSpec": [
     {
@@ -61,6 +61,12 @@
       "optional": true,
       "class": "string",
       "default": "250,500,1000"
+    },
+    {
+      "name": "samplesheet",
+      "label": "samplesheet",
+      "optional": true,
+      "class": "file"
     }
   ],
   "outputSpec": [
@@ -96,7 +102,7 @@
     "org-emee_1"
   ],
   "access": {
-    "allProjects": "VIEW",
+    "allProjects": "CONTRIBUTE",
     "project": "CONTRIBUTE"
   },
   "regionalOptions": {
