@@ -40,11 +40,11 @@ _parse_samplesheet_wells() {
     # turn the file into regex patterns by well row and by column for highlighting in report
     printf "well\tsamplenames\n" > inputs/samplesheet_well_samplename_patterns.tsv
 
-    sort -k2 inputs/samplesheet_wells.tsv \
+    tail -n+2 inputs/samplesheet_wells.tsv \
         | awk '{ arr[$2] = (arr[$2] ? arr[$2] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
         | sort -k1 >> inputs/samplesheet_well_samplename_patterns.tsv
 
-    sort -k3n inputs/samplesheet_wells.tsv \
+    tail -n+2 inputs/samplesheet_wells.tsv \
         | awk '{ arr[$3] = (arr[$3] ? arr[$3] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
         | sort -k1n >> inputs/samplesheet_well_samplename_patterns.tsv
 }
@@ -67,15 +67,16 @@ main() {
     fi
 
     echo "Download all QC metrics from the folders specified in the config file"
-    if [[ $(dx find data --path "${project}:/$primary") ]]; then
+    if [[ $(dx find data --path "${project}:/$primary" | tail -n1) ]]; then
         # found data in specified dir => use it
         workflowdir="$project:/$primary"
-    elif [[ $(dx find data --path "${project}:/output/${primary}") ]]; then
+    elif [[ $(dx find data --path "${project}:/output/${primary}" | tail -n1) ]]; then
         # dir specified without output prefix
         workflowdir="$project:/output/${primary}"
     else
         dx-jobutil-report-error "Given primary output directory does not contain data"
     fi
+
     # get all file patterns of files to download from primary workflow output folder,
     # then find and download from project in given folder
     for pattern in $(~/yq_4.45.1 -r '.["dx_sp"].["primary"].[] | flatten | join(" ")' config.yaml); do
