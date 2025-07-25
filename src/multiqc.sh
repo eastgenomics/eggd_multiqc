@@ -2,9 +2,53 @@
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
+
 # set frequency of instance usage in logs to 30 seconds
 kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
 /usr/bin/dx-dstat 30
+
+_parse_samplesheet_wells() {
+    : '''
+    Parses the well rows and columns from provided samplesheet.
+
+    This requires adding custom_content sections to the multiQC config file
+    to be parsed into the output report.
+
+    Outputs
+    -------
+    samplesheet_wells.tsv
+        File containing samplename, well columns and well row
+    samplesheet_well_samplename_patterns.tsv
+        File containing samplenames "|" joined by well row and column,
+        to be used for adding as regex patterns into the report for
+        highlighting
+    '''
+    printf "samplename\twell_column\twell_row\n" > inputs/samplesheet_wells.tsv
+
+    dx cat "$samplesheet" \
+        | sed -n '/Sample_ID/,$p' \
+        | awk 'BEGIN { FS=","; OFS="\t"} NR==1 {
+                for (i=1; i<=NF; i++) {
+                    f[$i] = i
+                }
+            }
+            { print $(f["Sample_ID"]), substr($(f["Sample_Well"]), 1, 1), substr($(f["Sample_Well"]), 2) }' \
+        | tail -n+2 >> inputs/samplesheet_wells.tsv
+
+    echo "Wells for samples parsed from samplesheet:"
+    cat inputs/samplesheet_wells.tsv
+
+    # turn the file into regex patterns by well row and by column for highlighting in report
+    printf "well\tsamplenames\n" > inputs/samplesheet_well_samplename_patterns.tsv
+
+    sort -k2 inputs/samplesheet_wells.tsv \
+        | awk '{ arr[$2] = (arr[$2] ? arr[$2] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
+        | sort -k1 >> inputs/samplesheet_well_samplename_patterns.tsv
+
+    sort -k3n samplesheet_wells.tsv \
+        | awk '{ arr[$3] = (arr[$3] ? arr[$3] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
+        | sort -k1n >> inputs/samplesheet_well_samplename_patterns.tsv
+}
 
 main() {
     echo "Downloading Docker image and config file"
@@ -18,6 +62,10 @@ main() {
     # Make directory to pull in all QC files
     mkdir inputs
     touch input_files.txt
+
+    if [[ "$samplesheet" ]]; then
+        _parse_samplesheet_wells
+    fi
 
     echo "Download all QC metrics from the folders specified in the config file"
     if [[ $(dx find data --path "${project}:/$primary") ]]; then
