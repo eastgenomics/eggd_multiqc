@@ -19,9 +19,8 @@ _parse_samplesheet_wells() {
     samplesheet_wells.tsv
         File containing samplename, well columns and well row
     samplesheet_well_samplename_patterns.tsv
-        File containing samplenames "|" joined by well row and column,
-        to be used for adding as regex patterns into the report for
-        highlighting
+        File containing samplenames "|" joined from each well row and column,
+        to be used for adding as regex patterns into the report for highlighting
     '''
     printf "samplename\twell_column\twell_row\n" > inputs/samplesheet_wells.tsv
 
