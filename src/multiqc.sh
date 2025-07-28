@@ -83,7 +83,7 @@ main() {
     done
 
     # many small files => download more in parallel than one per CPU core
-    download_processes=$(echo "$(nproc) * 4" | bc)
+    download_processes=$(echo "$(nproc) * 8" | bc)
     SECONDS=0
     cat input_files.txt | xargs -P"$download_processes" -I{} dx download -f {} -o ./inputs/
     duration=$SECONDS
@@ -152,10 +152,6 @@ main() {
 
     # Upload the input_files.txt to keep an audit trail
     mv input_files.txt ${outdir}/
-
-    # Add the parsed samplesheet well info files to output
-    mv inputs/samplesheet_wells.tsv "${outdir}/${project}_samplesheet_wells.tsv"
-    mv inputs/samplesheet_well_samplename_patterns.tsv "${outdir}/${project}_samplesheet_well_samplename_patterns.tsv"
 
     dx-upload-all-outputs --parallel
 }
