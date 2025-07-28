@@ -17,11 +17,13 @@ _parse_samplesheet_wells() {
     Outputs
     -------
     samplesheet_wells.tsv
-        File containing samplename, well columns and well row
+        tsv file containing samplename, well columns and well rows
     samplesheet_well_samplename_patterns.tsv
-        File containing samplenames "|" joined from each well row and column,
+        tsv file containing samplenames "|" joined from each well row and column,
         to be used for adding as regex patterns into the report for highlighting
     '''
+    echo "Parsing sample well information from samplesheet"
+
     printf "samplename\twell_column\twell_row\n" > inputs/samplesheet_wells.tsv
 
     dx cat "$samplesheet" \
@@ -33,9 +35,6 @@ _parse_samplesheet_wells() {
             }
             { print $(f["Sample_ID"]), substr($(f["Sample_Well"]), 1, 1), substr($(f["Sample_Well"]), 2) }' \
         | tail -n+2 >> inputs/samplesheet_wells.tsv
-
-    echo "Wells for samples parsed from samplesheet:"
-    cat inputs/samplesheet_wells.tsv
 
     # turn the file into regex patterns by well row and by column for highlighting in report
     printf "well\tsamplenames\n" > inputs/samplesheet_well_samplename_patterns.tsv
@@ -83,7 +82,12 @@ main() {
         dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
     done
 
-    cat input_files.txt | xargs -P$(nproc --all) -I{} dx download -f {} -o ./inputs/
+    # many small files => download more in parallel than one per CPU core
+    download_processes=$(echo "$(nproc) * 4" | bc)
+    SECONDS=0
+    cat input_files.txt | xargs -P"$download_processes" -I{} dx download -f {} -o ./inputs/
+    duration=$SECONDS
+    echo "Downloading took ${duration}s"
 
     # Download all /demultiplex_multiqc_files
     echo "Looking for files in /demultiplex_multiqc_files"
@@ -148,6 +152,10 @@ main() {
 
     # Upload the input_files.txt to keep an audit trail
     mv input_files.txt ${outdir}/
+
+    # Add the parsed samplesheet well info files to output
+    mv inputs/samplesheet_wells.tsv "${outdir}/${project}_samplesheet_wells.tsv"
+    mv inputs/samplesheet_well_samplename_patterns.tsv "${outdir}/${project}_samplesheet_well_samplename_patterns.tsv"
 
     dx-upload-all-outputs --parallel
 }
