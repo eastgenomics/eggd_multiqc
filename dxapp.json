@@ -66,7 +66,8 @@
       "name": "samplesheet",
       "label": "samplesheet",
       "optional": true,
-      "class": "file"
+      "class": "file",
+      "help": "used to parse sample well info into tsv files for adding into the report"
     }
   ],
   "outputSpec": [
