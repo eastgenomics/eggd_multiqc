@@ -2,9 +2,51 @@
 
 # Exit at any point if there is any error and output each line as it is executed (for debugging)
 set -e -x -o pipefail
-# set frequency of instance usage in logs to 30 seconds
+
+# set frequency of instance usage in logs to 10 seconds
 kill $(ps aux | grep pcp-dstat | head -n1 | awk '{print $2}')
-/usr/bin/dx-dstat 30
+/usr/bin/dx-dstat 10
+
+_parse_samplesheet_wells() {
+    : '''
+    Parses the well rows and columns from provided samplesheet.
+
+    This requires adding custom_content sections to the multiQC config file
+    to be parsed into the output report.
+
+    Outputs
+    -------
+    samplesheet_wells.tsv
+        tsv file containing samplename, well columns and well rows
+    samplesheet_well_samplename_patterns.tsv
+        tsv file containing samplenames "|" joined from each well row and column,
+        to be used for adding as regex patterns into the report for highlighting
+    '''
+    echo "Parsing sample well information from samplesheet"
+
+    printf "samplename\twell_column\twell_row\n" > inputs/samplesheet_wells.tsv
+
+    dx cat "$samplesheet" \
+        | sed -n '/Sample_ID/,$p' \
+        | awk 'BEGIN { FS=","; OFS="\t"} NR==1 {
+                for (i=1; i<=NF; i++) {
+                    f[$i] = i
+                }
+            }
+            { print $(f["Sample_ID"]), substr($(f["Sample_Well"]), 1, 1), substr($(f["Sample_Well"]), 2) }' \
+        | tail -n+2 >> inputs/samplesheet_wells.tsv
+
+    # turn the file into regex patterns by well row and by column for highlighting in report
+    printf "well\tsamplenames\n" > inputs/samplesheet_well_samplename_patterns.tsv
+
+    tail -n+2 inputs/samplesheet_wells.tsv \
+        | awk '{ arr[$2] = (arr[$2] ? arr[$2] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
+        | sort -k1 >> inputs/samplesheet_well_samplename_patterns.tsv
+
+    tail -n+2 inputs/samplesheet_wells.tsv \
+        | awk '{ arr[$3] = (arr[$3] ? arr[$3] "|" $1 : $1) } END { for (i in arr) print i "\t" arr[i] }' \
+        | sort -k1n >> inputs/samplesheet_well_samplename_patterns.tsv
+}
 
 main() {
     echo "Downloading Docker image and config file"
@@ -19,23 +61,33 @@ main() {
     mkdir inputs
     touch input_files.txt
 
+    if [[ "$samplesheet" ]]; then
+        _parse_samplesheet_wells
+    fi
+
     echo "Download all QC metrics from the folders specified in the config file"
-    if [[ $(dx find data --path "${project}:/$primary") ]]; then
+    if [[ $(dx find data --path "${project}:/$primary" | tail -n1) ]]; then
         # found data in specified dir => use it
         workflowdir="$project:/$primary"
-    elif [[ $(dx find data --path "${project}:/output/${primary}") ]]; then
+    elif [[ $(dx find data --path "${project}:/output/${primary}" | tail -n1) ]]; then
         # dir specified without output prefix
         workflowdir="$project:/output/${primary}"
     else
         dx-jobutil-report-error "Given primary output directory does not contain data"
     fi
+
     # get all file patterns of files to download from primary workflow output folder,
     # then find and download from project in given folder
     for pattern in $(~/yq_4.45.1 -r '.["dx_sp"].["primary"].[] | flatten | join(" ")' config.yaml); do
         dx find data --brief --path "$workflowdir" --name "$pattern"  >> input_files.txt
     done
 
-    cat input_files.txt | xargs -P$(nproc --all) -n1 -I{} dx download -f {} -o ./inputs/
+    # many small files => download more in parallel than one per CPU core
+    download_processes=$(echo "$(nproc) * 8" | bc)
+    SECONDS=0
+    cat input_files.txt | xargs -P"$download_processes" -I{} dx download -f {} -o ./inputs/
+    duration=$SECONDS
+    echo "Downloading took ${duration}s"
 
     # Download all /demultiplex_multiqc_files
     echo "Looking for files in /demultiplex_multiqc_files"
@@ -47,7 +99,7 @@ main() {
         # Fetch and download InterOp files in parallel
         dx find data --brief --path "$demultiplex_multiqc_files_directory" \
           | tee -a input_files.txt \
-          | xargs -P$(nproc --all) -n1 -I{} dx download -f {} -o ./inputs/
+          | xargs -P$(nproc --all) -I{} dx download -f {} -o ./inputs/
     else
         echo "No files found in /demultiplex_multiqc_files"
     fi
@@ -70,8 +122,10 @@ main() {
 
     # Remove 002_ from the beginning of the project name
     project=${project#"002_"}
+
     # Remove '_clinicalgenetics' from the end of the project name
     project=${project%"_clinicalgenetics"}
+
     # Rename inputs folder to a more meaningful one to be displayed in the report
     # Set the report name to include the project and primary workflow
     folder_name="${project}-${primary##*/}"
@@ -83,19 +137,21 @@ main() {
     outdir=out/multiqc_data_files && mkdir -p ${outdir}
 
     echo "Running MultiQC on the downloaded QC metric files"
-    # Load the docker image and then run it
     docker load -i MultiQC.tar.gz
     MultiQC_image=$(docker images --format="{{.Repository}} {{.ID}}" | grep multiqc | cut -d' ' -f2)
     docker run -v /home/dnanexus:/egg -w /egg $MultiQC_image multiqc "$folder_name" -c config.yaml
 
     echo "Uploading the config file, html report and a folder of data files"
     mv multiqc_data ${outdir}/
+
     # Move the config file to the multiqc data output folder. This was created by running multiqc
     mv config.yaml ${outdir}/$multiqc_config_file_name
+
     # Move the multiqc report HTML to the output directory for uploading
     mv multiqc_report.html ${report_outdir}/$report_name
+
     # Upload the input_files.txt to keep an audit trail
     mv input_files.txt ${outdir}/
-    # Upload results
+
     dx-upload-all-outputs --parallel
 }

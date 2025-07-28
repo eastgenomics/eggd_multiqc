@@ -1,12 +1,12 @@
 # MultiQC (DNAnexus Platform App)
 
-Uses the [MultiQC](https://multiqc.info/docs/) tool developed and maintained by Phil Ewels: [ewels/MultiQC](https://github.com/ewels/MultiQC/)
+Uses the [MultiQC](https://multiqc.info/docs/) tool developed and maintained by Seqera: [MultiQC/MultiQC](https://github.com/MultiQC/MultiQC)
 
-Docker images are available from [here](https://hub.docker.com/r/ewels/multiqc/)
+Docker images are available from [here](https://hub.docker.com/r/multiqc/multiqc/)
 
 ## What does this app do?
 
-This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" field in the config.yaml. Then runs the MultiQC tool to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://github.com/ewels/MultiQC/tree/v1.11/multiqc/modules).
+This app downloads the quality metric files as specified by the location and filename extension in the "dx_sp" field in the config.yaml. Then runs the MultiQC tool to generate a run-wide quality report. Modules and columns to be displayed are specified in the config file, the full list of supported modules can be found [here](https://docs.seqera.io/multiqc/modules/).
 
 It is essential to use a config file that has a "dx_sp" section with "primary" for file extenstions in app/outputs of the primary workflow and "secondary" for file extenstions in app/outputs of the secondary workflow.
 
@@ -21,8 +21,13 @@ It is essential to use a config file that has a "dx_sp" section with "primary" f
 
 Optional inputs:
 
-* calc_custom_coverage: Boolean to indicate whether custom coverage needs to be computed and added to the multiqc report.
-* depths: Depths to compute coverage for.
+* `calc_custom_coverage`: Boolean to indicate whether custom coverage needs to be computed and added to the multiqc report.
+* `depths`: Depths to compute coverage for.
+* `samplesheet`: samplesheet for the run, used to parse sample well info into tsv files for adding into the report. This will create 2 files within the app which may be added to the config file to display in the report:
+  * `samplesheet_wells.tsv`
+    * tsv file containing samplename, well columns and well rows, to be added to general stats table
+  * `samplesheet_well_samplename_patterns.tsv`
+    * tsv file containing samplenames "|" joined from each well row and column, to be used for adding as regex patterns into the report for highlighting
 
 ## What does this app output?
 
