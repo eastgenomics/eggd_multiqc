@@ -24,7 +24,7 @@ _parse_samplesheet_wells() {
     '''
     echo "Parsing sample well information from samplesheet"
 
-    printf "samplename\twell_column\twell_row\n" > inputs/samplesheet_wells.tsv
+    printf "samplename\twell_row\twell_column\n" > inputs/samplesheet_wells.tsv
 
     dx cat "$samplesheet" \
         | sed -n '/Sample_ID/,$p' \
