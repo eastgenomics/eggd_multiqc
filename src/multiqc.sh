@@ -18,6 +18,8 @@ _parse_samplesheet_wells() {
     -------
     samplesheet_wells.tsv
         tsv file containing samplename, well columns and well rows
+    samplesheet_wells_filtered.tsv
+        tsv file containing samplename, well columns and well rows, filtered by assay code if specified in config file
     samplesheet_well_samplename_patterns.tsv
         tsv file containing samplenames "|" joined from each well row and column,
         to be used for adding as regex patterns into the report for highlighting
