@@ -18,6 +18,8 @@ _parse_samplesheet_wells() {
     -------
     samplesheet_wells.tsv
         tsv file containing samplename, well columns and well rows
+    samplesheet_wells_filtered.tsv
+        tsv file containing samplename, well columns and well rows, filtered by assay code if specified in config file
     samplesheet_well_samplename_patterns.tsv
         tsv file containing samplenames "|" joined from each well row and column,
         to be used for adding as regex patterns into the report for highlighting
@@ -35,6 +37,16 @@ _parse_samplesheet_wells() {
             }
             { print $(f["Sample_ID"]), substr($(f["Sample_Well"]), 1, 1), substr($(f["Sample_Well"]), 2) }' \
         | tail -n+2 >> inputs/samplesheet_wells.tsv
+    
+    # filter file by assay code if specified in config file
+    printf "samplename\twell_row\twell_column\n" > inputs/samplesheet_wells_filtered.tsv
+
+    assay_code=$(awk -F': ' '/^assay_code:/ {print $2}' config.yaml)
+    if [[ "$assay_code" ]]; then
+        awk -v assay="$assay_code" '$1 ~ assay' inputs/samplesheet_wells.tsv >> inputs/samplesheet_wells_filtered.tsv
+    else
+        tail -n+2 inputs/samplesheet_wells.tsv >> inputs/samplesheet_wells_filtered.tsv
+    fi
 
     # turn the file into regex patterns by well row and by column for highlighting in report
     printf "well\tsamplenames\n" > inputs/samplesheet_well_samplename_patterns.tsv
